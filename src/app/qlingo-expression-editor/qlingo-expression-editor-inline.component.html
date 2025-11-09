@@ -1,0 +1,542 @@
+<div class="qlingo-inline-editor card">
+  <div class="card-header">
+    <h5 class="card-title mb-0">
+      <i class="bi bi-code-square me-2"></i>
+      QLingo Expression Builder
+    </h5>
+  </div>
+
+  <div class="card-body">
+    <!-- Inline Expression Flow -->
+    <div class="expression-flow p-3 bg-light border rounded">
+      <ng-container *ngIf="rootNode">
+        <ng-container *ngTemplateOutlet="inlineNode; context: { node: rootNode, path: [] }"></ng-container>
+      </ng-container>
+    </div>
+
+    <!-- Generated Expression Display -->
+    <div class="generated-expression mt-3 p-3 bg-white border rounded">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <label class="form-label fw-bold mb-0">
+          <i class="bi bi-code-slash me-1"></i> Generated Expression:
+        </label>
+        <button class="btn btn-sm btn-outline-secondary" (click)="reset()">
+          <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+        </button>
+      </div>
+      <pre class="mb-0 p-2 bg-light border rounded"><code>{{ generatedExpression || '(empty)' }}</code></pre>
+    </div>
+
+    <!-- Preview -->
+    <div *ngIf="enablePreview" class="preview mt-3 p-3 border rounded"
+         [class.bg-success-subtle]="hasPreviewResult()"
+         [class.bg-danger-subtle]="hasPreviewError()">
+      <label class="form-label fw-bold">
+        <i class="bi bi-eye me-1"></i> Preview Result:
+      </label>
+      <div *ngIf="hasPreviewError()" class="text-danger">
+        <strong>Error:</strong> {{ previewError }}
+      </div>
+      <div *ngIf="hasPreviewResult()" class="preview-result">
+        <strong>Result:</strong>
+        <code class="ms-2">{{ previewResult }}</code>
+        <small class="text-muted ms-2">({{ getTypeOf(previewResult) }})</small>
+      </div>
+      <div *ngIf="isPreviewResultNull()" class="text-muted">
+        <em>Expression evaluates to NULL</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <div class="d-flex gap-2">
+      <button class="btn btn-success" (click)="applyExpression()">
+        <i class="bi bi-check-circle me-1"></i> Apply Expression
+      </button>
+      <button class="btn btn-secondary" (click)="reset()">
+        <i class="bi bi-x-circle me-1"></i> Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Inline Node Template -->
+<ng-template #inlineNode let-node="node" let-path="path">
+  <span class="inline-node-wrapper">
+
+    <!-- Empty Node - Dropdown to select type -->
+    <span *ngIf="node.type === 'Empty'" class="empty-slot">
+      <select class="form-select form-select-sm d-inline-block w-auto"
+              (change)="replaceNode(path, $any($event.target).value); $any($event.target).value = ''">
+        <option value="">[ Add Expression ▼ ]</option>
+        <optgroup label="Literals">
+          <option value="literal-string">String</option>
+          <option value="literal-number">Number</option>
+          <option value="literal-boolean-true">TRUE</option>
+          <option value="literal-boolean-false">FALSE</option>
+          <option value="literal-null">NULL</option>
+        </optgroup>
+        <optgroup label="Variables">
+          <option value="variable">Variable</option>
+        </optgroup>
+        <optgroup label="Functions - Numeric">
+          <option value="func-abs">Abs()</option>
+          <option value="func-ceil">Ceil()</option>
+          <option value="func-floor">Floor()</option>
+          <option value="func-round">Round()</option>
+          <option value="func-max">Max()</option>
+          <option value="func-min">Min()</option>
+        </optgroup>
+        <optgroup label="Functions - String">
+          <option value="func-ucase">UCase()</option>
+          <option value="func-lcase">LCase()</option>
+          <option value="func-tcase">TCase()</option>
+          <option value="func-length">Length()</option>
+          <option value="func-trim">Trim()</option>
+          <option value="func-substring">SubString()</option>
+        </optgroup>
+        <optgroup label="Control Flow">
+          <option value="if">If/Then/Else</option>
+          <option value="switch">Switch/Case</option>
+        </optgroup>
+        <optgroup label="Operators">
+          <option value="op-concat">& (Concatenate)</option>
+          <option value="op-add">+ (Add)</option>
+          <option value="op-subtract">- (Subtract)</option>
+          <option value="op-multiply">* (Multiply)</option>
+          <option value="op-divide">/ (Divide)</option>
+          <option value="op-equals">== (Equals)</option>
+          <option value="op-not-equals">!= (Not Equals)</option>
+          <option value="op-greater">></option>
+          <option value="op-less"><</option>
+          <option value="op-and">AND</option>
+          <option value="op-or">OR</option>
+          <option value="op-not">NOT</option>
+        </optgroup>
+      </select>
+    </span>
+
+    <!-- Literal - Type dropdown + Input field -->
+    <span *ngIf="node.type === 'Literal'" class="literal-value">
+      <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+              [value]="'literal-' + node.dataType"
+              (change)="changeLiteralOrType(path, $any($event.target).value)">
+        <optgroup label="Literal Type">
+          <option value="literal-string">[String ▼]</option>
+          <option value="literal-number">[Number ▼]</option>
+          <option value="literal-boolean">[Boolean ▼]</option>
+          <option value="literal-null">[NULL ▼]</option>
+        </optgroup>
+        <optgroup label="Change to Variable">
+          <option value="variable">Variable</option>
+        </optgroup>
+        <optgroup label="Change to Function - Numeric">
+          <option value="func-abs">Abs()</option>
+          <option value="func-ceil">Ceil()</option>
+          <option value="func-floor">Floor()</option>
+          <option value="func-round">Round()</option>
+          <option value="func-max">Max()</option>
+          <option value="func-min">Min()</option>
+        </optgroup>
+        <optgroup label="Change to Function - String">
+          <option value="func-ucase">UCase()</option>
+          <option value="func-lcase">LCase()</option>
+          <option value="func-tcase">TCase()</option>
+          <option value="func-length">Length()</option>
+          <option value="func-trim">Trim()</option>
+          <option value="func-substring">SubString()</option>
+        </optgroup>
+        <optgroup label="Change to Function - Utility">
+          <option value="func-isnullorempty">IsNullOrEmpty()</option>
+          <option value="func-isnull">IsNull()</option>
+          <option value="func-isempty">IsEmpty()</option>
+        </optgroup>
+        <optgroup label="Change to Control Flow">
+          <option value="if">If/Then/Else</option>
+          <option value="switch">Switch/Case</option>
+        </optgroup>
+        <optgroup label="Change to Operator">
+          <option value="op-concat">& (Concatenate)</option>
+          <option value="op-add">+ (Add)</option>
+          <option value="op-subtract">- (Subtract)</option>
+          <option value="op-multiply">* (Multiply)</option>
+          <option value="op-divide">/ (Divide)</option>
+          <option value="op-equals">== (Equals)</option>
+          <option value="op-not-equals">!= (Not Equals)</option>
+          <option value="op-and">AND</option>
+          <option value="op-or">OR</option>
+          <option value="op-not">NOT</option>
+        </optgroup>
+      </select>
+      <input *ngIf="node.dataType === 'string'"
+             type="text"
+             class="form-control form-control-sm d-inline-block literal-input"
+             [value]="node.value"
+             (input)="updateLiteral(path, $any($event.target).value)"
+             placeholder="Enter text">
+      <input *ngIf="node.dataType === 'number'"
+             type="number"
+             class="form-control form-control-sm d-inline-block literal-input"
+             [value]="node.value"
+             (input)="updateLiteral(path, $any($event.target).value)"
+             step="any"
+             placeholder="0">
+      <select *ngIf="node.dataType === 'boolean'"
+              class="form-control form-control-sm d-inline-block literal-input"
+              [value]="node.value"
+              (change)="updateLiteral(path, $any($event.target).value === 'true')">
+        <option [value]="true">TRUE</option>
+        <option [value]="false">FALSE</option>
+      </select>
+    </span>
+
+    <!-- Variable - Dropdown or input -->
+    <span *ngIf="node.type === 'Variable'" class="variable-ref">
+      <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown me-1"
+              value="variable"
+              (change)="changeVariableOrType(path, $any($event.target).value)">
+        <option value="variable">[Variable ▼]</option>
+        <optgroup label="Change to Literal">
+          <option value="literal-string">String</option>
+          <option value="literal-number">Number</option>
+          <option value="literal-boolean-true">TRUE</option>
+          <option value="literal-boolean-false">FALSE</option>
+          <option value="literal-null">NULL</option>
+        </optgroup>
+        <optgroup label="Change to Function - Numeric">
+          <option value="func-abs">Abs()</option>
+          <option value="func-ceil">Ceil()</option>
+          <option value="func-floor">Floor()</option>
+          <option value="func-round">Round()</option>
+          <option value="func-max">Max()</option>
+          <option value="func-min">Min()</option>
+        </optgroup>
+        <optgroup label="Change to Function - String">
+          <option value="func-ucase">UCase()</option>
+          <option value="func-lcase">LCase()</option>
+          <option value="func-tcase">TCase()</option>
+          <option value="func-length">Length()</option>
+          <option value="func-trim">Trim()</option>
+          <option value="func-substring">SubString()</option>
+        </optgroup>
+        <optgroup label="Change to Function - Utility">
+          <option value="func-isnullorempty">IsNullOrEmpty()</option>
+          <option value="func-isnull">IsNull()</option>
+          <option value="func-isempty">IsEmpty()</option>
+        </optgroup>
+        <optgroup label="Change to Control Flow">
+          <option value="if">If/Then/Else</option>
+          <option value="switch">Switch/Case</option>
+        </optgroup>
+        <optgroup label="Change to Operator">
+          <option value="op-concat">& (Concatenate)</option>
+          <option value="op-add">+ (Add)</option>
+          <option value="op-subtract">- (Subtract)</option>
+          <option value="op-multiply">* (Multiply)</option>
+          <option value="op-divide">/ (Divide)</option>
+          <option value="op-equals">== (Equals)</option>
+          <option value="op-not-equals">!= (Not Equals)</option>
+          <option value="op-and">AND</option>
+          <option value="op-or">OR</option>
+          <option value="op-not">NOT</option>
+        </optgroup>
+      </select>
+      <span class="binding-prefix">|->[</span>
+      <select *ngIf="availableVariables.length > 0"
+              class="form-select form-select-sm d-inline-block w-auto variable-select"
+              [value]="node.name"
+              (change)="updateVariable(path, $any($event.target).value)">
+        <option value="">Select Variable ▼</option>
+        <option *ngFor="let varName of availableVariables" [value]="varName">{{ varName }}</option>
+      </select>
+      <input *ngIf="availableVariables.length === 0"
+             type="text"
+             class="form-control form-control-sm d-inline-block variable-input"
+             [value]="node.name"
+             (input)="updateVariable(path, $any($event.target).value)"
+             placeholder="VariableName">
+      <span class="binding-suffix">]</span>
+    </span>
+
+    <!-- Binary Operator -->
+    <span *ngIf="node.type === 'BinaryOp'" class="binary-op">
+      <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.left, path: path.concat([0]) }"></ng-container>
+      <select class="form-select form-select-sm d-inline-block w-auto mx-2 operator-select"
+              [value]="node.operator"
+              (change)="updateOperator(path, $any($event.target).value)">
+        <optgroup label="Arithmetic">
+          <option value="+">+</option>
+          <option value="-">-</option>
+          <option value="*">*</option>
+          <option value="/">/</option>
+          <option value="%">%</option>
+          <option value="^">^</option>
+        </optgroup>
+        <optgroup label="Comparison">
+          <option value="==">=</option>
+          <option value="!=">!=</option>
+          <option value="<">&lt;</option>
+          <option value=">">&gt;</option>
+          <option value="<=">&lt;=</option>
+          <option value=">=">&gt;=</option>
+        </optgroup>
+        <optgroup label="Logical">
+          <option value="AND">AND</option>
+          <option value="OR">OR</option>
+        </optgroup>
+        <optgroup label="String">
+          <option value="&">&amp;</option>
+        </optgroup>
+      </select>
+      <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.right, path: path.concat([1]) }"></ng-container>
+    </span>
+
+    <!-- Unary Operator -->
+    <span *ngIf="node.type === 'UnaryOp'" class="unary-op">
+      <select class="form-select form-select-sm d-inline-block w-auto me-2 operator-select"
+              [value]="node.operator"
+              (change)="updateOperator(path, $any($event.target).value)">
+        <option value="+">+</option>
+        <option value="-">-</option>
+        <option value="!">!</option>
+        <option value="NOT">NOT</option>
+      </select>
+      <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.operand, path: path.concat([0]) }"></ng-container>
+    </span>
+
+    <!-- Function Call -->
+    <span *ngIf="node.type === 'FunctionCall'" class="function-call">
+      <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+              [value]="getFunctionOptionKey(node.name)"
+              (change)="changeFunctionOrType(path, $any($event.target).value)">
+        <option [value]="getFunctionOptionKey(node.name)">[{{ node.name }} ▼]</option>
+        <optgroup label="Change to Function - Numeric">
+          <option value="func-abs">[Abs ▼]</option>
+          <option value="func-ceil">[Ceil ▼]</option>
+          <option value="func-floor">[Floor ▼]</option>
+          <option value="func-round">[Round ▼]</option>
+          <option value="func-max">[Max ▼]</option>
+          <option value="func-min">[Min ▼]</option>
+        </optgroup>
+        <optgroup label="Change to Function - String">
+          <option value="func-ucase">[UCase ▼]</option>
+          <option value="func-lcase">[LCase ▼]</option>
+          <option value="func-tcase">[TCase ▼]</option>
+          <option value="func-length">[Length ▼]</option>
+          <option value="func-trim">[Trim ▼]</option>
+          <option value="func-substring">[SubString ▼]</option>
+        </optgroup>
+        <optgroup label="Change to Function - Utility">
+          <option value="func-isnullorempty">[IsNullOrEmpty ▼]</option>
+          <option value="func-isnull">[IsNull ▼]</option>
+          <option value="func-isempty">[IsEmpty ▼]</option>
+        </optgroup>
+        <optgroup label="Change to Literal">
+          <option value="literal-string">String</option>
+          <option value="literal-number">Number</option>
+          <option value="literal-boolean-true">TRUE</option>
+          <option value="literal-boolean-false">FALSE</option>
+          <option value="literal-null">NULL</option>
+        </optgroup>
+        <optgroup label="Change to Variable">
+          <option value="variable">Variable</option>
+        </optgroup>
+        <optgroup label="Change to Control Flow">
+          <option value="if">If/Then/Else</option>
+          <option value="switch">Switch/Case</option>
+        </optgroup>
+      </select>
+      <span class="paren">(</span>
+      <span *ngFor="let arg of node.args; let i = index; let isLast = last">
+        <ng-container *ngTemplateOutlet="inlineNode; context: { node: arg, path: path.concat([i]) }"></ng-container>
+        <span *ngIf="!isLast" class="comma">, </span>
+      </span>
+      <span class="paren">)</span>
+    </span>
+
+    <!-- If Statement -->
+    <span *ngIf="node.type === 'If'" class="if-statement">
+      <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+              value="if"
+              (change)="changeControlFlowType(path, $any($event.target).value)">
+        <option value="if">[If ▼]</option>
+        <optgroup label="Change to Control Flow">
+          <option value="switch">Switch/Case</option>
+        </optgroup>
+        <optgroup label="Change to Literal">
+          <option value="literal-string">String</option>
+          <option value="literal-number">Number</option>
+          <option value="literal-boolean-true">TRUE</option>
+          <option value="literal-boolean-false">FALSE</option>
+          <option value="literal-null">NULL</option>
+        </optgroup>
+        <optgroup label="Change to Variable">
+          <option value="variable">Variable</option>
+        </optgroup>
+        <optgroup label="Change to Function">
+          <option value="func-isnullorempty">IsNullOrEmpty()</option>
+          <option value="func-length">Length()</option>
+          <option value="func-trim">Trim()</option>
+        </optgroup>
+      </select>
+      <span class="paren">(</span>
+      <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.condition, path: path.concat([0]) }"></ng-container>
+      <span class="paren">)</span>
+      <span class="keyword ms-2">[Then]</span>
+      <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.consequent, path: path.concat([1]) }"></ng-container>
+
+      <!-- Else If (when alternate is another If statement) -->
+      <span *ngIf="node.alternate && node.alternate.type === 'If'" class="ms-2">
+        <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+                value="has-else-if"
+                (change)="toggleElse(path, $any($event.target).value); $any($event.target).value = 'has-else-if'">
+          <option value="has-else-if">[Else If ▼]</option>
+          <optgroup label="Actions">
+            <option value="remove-else">Remove Else If</option>
+          </optgroup>
+        </select>
+        <span class="paren">(</span>
+        <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.alternate.condition, path: path.concat([2, 0]) }"></ng-container>
+        <span class="paren">)</span>
+        <span class="keyword ms-2">[Then]</span>
+        <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.alternate.consequent, path: path.concat([2, 1]) }"></ng-container>
+        <!-- Recursively handle else-if chain or final else -->
+        <ng-container *ngIf="node.alternate.alternate && node.alternate.alternate.type === 'If'">
+          <!-- Another Else If in the chain - render it inline -->
+          <ng-container *ngTemplateOutlet="inlineNode; context: { node: { type: 'If', condition: node.alternate.alternate.condition, consequent: node.alternate.alternate.consequent, alternate: node.alternate.alternate.alternate, nodeType: 'primary' }, path: path.concat([2, 2]) }"></ng-container>
+        </ng-container>
+        <!-- Final Else (not an If) -->
+        <span *ngIf="node.alternate.alternate && node.alternate.alternate.type !== 'If'" class="ms-2">
+          <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+                  value="has-else"
+                  (change)="toggleElseOnAlternate(path.concat([2]), $any($event.target).value); $any($event.target).value = 'has-else'">
+            <option value="has-else">[Else ▼]</option>
+            <optgroup label="Actions">
+              <option value="remove-else">Remove Else</option>
+            </optgroup>
+          </select>
+          <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.alternate.alternate, path: path.concat([2, 2]) }"></ng-container>
+        </span>
+        <!-- Add Else to the Else If -->
+        <span *ngIf="!node.alternate.alternate" class="ms-2">
+          <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+                  value="no-else"
+                  (change)="toggleElseOnAlternate(path.concat([2]), $any($event.target).value); $any($event.target).value = 'no-else'">
+            <option value="no-else">[+ Add Else ▼]</option>
+            <optgroup label="Actions">
+              <option value="add-else">Add Else</option>
+              <option value="add-else-if">Add Else If</option>
+            </optgroup>
+          </select>
+        </span>
+      </span>
+
+      <!-- Simple Else (when alternate is not an If statement) -->
+      <span *ngIf="node.alternate && node.alternate.type !== 'If'" class="ms-2">
+        <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+                value="has-else"
+                (change)="toggleElse(path, $any($event.target).value); $any($event.target).value = 'has-else'">
+          <option value="has-else">[Else ▼]</option>
+          <optgroup label="Actions">
+            <option value="remove-else">Remove Else</option>
+          </optgroup>
+        </select>
+        <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.alternate, path: path.concat([2]) }"></ng-container>
+      </span>
+
+      <!-- No Else/Else If yet -->
+      <span *ngIf="!node.alternate" class="ms-2">
+        <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+                value="no-else"
+                (change)="toggleElse(path, $any($event.target).value); $any($event.target).value = 'no-else'">
+          <option value="no-else">[+ Add Else ▼]</option>
+          <optgroup label="Actions">
+            <option value="add-else">Add Else</option>
+            <option value="add-else-if">Add Else If</option>
+          </optgroup>
+        </select>
+      </span>
+    </span>
+
+    <!-- Switch Statement -->
+    <span *ngIf="node.type === 'Switch'" class="switch-statement">
+      <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+              value="switch"
+              (change)="changeControlFlowType(path, $any($event.target).value)">
+        <option value="switch">[Switch ▼]</option>
+        <optgroup label="Change to Control Flow">
+          <option value="if">If/Then/Else</option>
+        </optgroup>
+        <optgroup label="Change to Literal">
+          <option value="literal-string">String</option>
+          <option value="literal-number">Number</option>
+          <option value="literal-boolean-true">TRUE</option>
+          <option value="literal-boolean-false">FALSE</option>
+          <option value="literal-null">NULL</option>
+        </optgroup>
+        <optgroup label="Change to Variable">
+          <option value="variable">Variable</option>
+        </optgroup>
+        <optgroup label="Change to Function">
+          <option value="func-isnullorempty">IsNullOrEmpty()</option>
+          <option value="func-length">Length()</option>
+          <option value="func-trim">Trim()</option>
+        </optgroup>
+      </select>
+      <span class="paren">(</span>
+      <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.discriminant, path: path.concat([0]) }"></ng-container>
+      <span class="paren">)</span>
+      <div class="ms-4 mt-2">
+        <div *ngFor="let case of node.cases; let i = index" class="mb-2 d-flex align-items-center gap-2">
+          <span class="keyword">[Case]</span>
+          <ng-container *ngTemplateOutlet="inlineNode; context: { node: case.test, path: path.concat([i * 2 + 1]) }"></ng-container>
+          <span class="colon">:</span>
+          <ng-container *ngTemplateOutlet="inlineNode; context: { node: case.consequent, path: path.concat([i * 2 + 2]) }"></ng-container>
+          <button *ngIf="node.cases!.length > 1"
+                  class="btn btn-sm btn-outline-danger ms-2"
+                  (click)="removeSwitchCase(path, i)"
+                  title="Remove this case">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
+        <div class="mb-2">
+          <button class="btn btn-sm btn-outline-success"
+                  (click)="addSwitchCase(path)"
+                  title="Add another case">
+            <i class="bi bi-plus-circle me-1"></i> Add Case
+          </button>
+        </div>
+        <div *ngIf="node.default" class="mb-2 d-flex align-items-center gap-2">
+          <span class="keyword">[Default]</span>
+          <span class="colon">:</span>
+          <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.default, path: path.concat([node.cases!.length * 2 + 1]) }"></ng-container>
+          <button class="btn btn-sm btn-outline-danger ms-2"
+                  (click)="removeSwitchDefault(path)"
+                  title="Remove default case">
+            <i class="bi bi-x-circle"></i>
+          </button>
+        </div>
+        <div *ngIf="!node.default" class="mb-2">
+          <button class="btn btn-sm btn-outline-success"
+                  (click)="addSwitchDefault(path)"
+                  title="Add default case">
+            <i class="bi bi-plus-circle me-1"></i> Add Default
+          </button>
+        </div>
+      </div>
+    </span>
+
+    <!-- Block Statement - render contents without braces -->
+    <span *ngIf="node.type === 'Block'" class="block-statement">
+      <ng-container *ngIf="node.body && node.body.length > 0">
+        <ng-container *ngFor="let statement of node.body; let i = index">
+          <ng-container *ngTemplateOutlet="inlineNode; context: { node: statement, path: path.concat([i]) }"></ng-container>
+        </ng-container>
+      </ng-container>
+      <span *ngIf="!node.body || node.body.length === 0">
+        [ Add Expression ▼ ]
+      </span>
+    </span>
+
+  </span>
+</ng-template>

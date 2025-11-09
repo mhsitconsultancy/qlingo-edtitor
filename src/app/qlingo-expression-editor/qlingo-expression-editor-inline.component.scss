@@ -1,0 +1,337 @@
+.qlingo-inline-editor {
+  .expression-flow {
+    min-height: 100px;
+    font-size: 0.95rem;
+    line-height: 2.5;
+  }
+
+  .inline-node-wrapper {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  // Keywords in brackets
+  .keyword {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #0d6efd;
+    color: white;
+    border-radius: 0.25rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  // Keyword dropdowns - styled to look like keywords
+  .keyword-dropdown {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #0d6efd;
+    color: white;
+    border: 2px solid #0d6efd;
+    border-radius: 0.25rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    cursor: pointer;
+    min-width: auto;
+
+    &:hover {
+      background: #0b5ed7;
+      border-color: #0b5ed7;
+    }
+
+    &:focus {
+      background: #0b5ed7;
+      border-color: #0a58ca;
+      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.5);
+      outline: none;
+    }
+
+    option {
+      background: white;
+      color: #212529;
+      padding: 0.5rem;
+    }
+
+    optgroup {
+      background: #f8f9fa;
+      color: #6c757d;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+  }
+
+  // Parentheses and punctuation
+  .paren, .comma, .colon {
+    font-weight: bold;
+    color: #6c757d;
+    font-size: 1.1rem;
+  }
+
+  // Empty slot - dropdown to add expression
+  .empty-slot {
+    select {
+      border: 2px dashed #28a745;
+      background: #f8f9fa;
+      color: #28a745;
+      font-weight: 500;
+      min-width: 180px;
+      cursor: pointer;
+
+      &:hover {
+        background: #e7f5ea;
+        border-color: #1e7e34;
+      }
+
+      &:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+      }
+    }
+  }
+
+  // Literal values
+  .literal-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .literal-input {
+      min-width: 120px;
+      max-width: 250px;
+    }
+
+    .literal-display {
+      padding: 0.25rem 0.5rem;
+      background: #198754;
+      color: white;
+      border-radius: 0.25rem;
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+  }
+
+  // Variable references
+  .variable-ref {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+
+    .binding-prefix, .binding-suffix {
+      font-weight: bold;
+      color: #0dcaf0;
+      font-size: 1rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    .variable-select {
+      min-width: 120px;
+      max-width: 200px;
+      border: 2px solid #0dcaf0;
+      background: #f0f9ff;
+      color: #055160;
+      font-weight: 500;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+
+      &:focus {
+        border-color: #0dcaf0;
+        border-left: none;
+        border-right: none;
+        box-shadow: none;
+        outline: none;
+      }
+    }
+
+    .variable-input {
+      min-width: 120px;
+      max-width: 200px;
+      border: 2px solid #0dcaf0;
+      background: #f0f9ff;
+      color: #055160;
+      font-weight: 500;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+
+      &:focus {
+        border-color: #0dcaf0;
+        border-left: none;
+        border-right: none;
+        box-shadow: none;
+        outline: none;
+      }
+    }
+  }
+
+  // Operators
+  .operator-select {
+    min-width: 80px;
+    max-width: 120px;
+    border: 2px solid #6c757d;
+    background: #e9ecef;
+    color: #212529;
+    font-weight: 600;
+    text-align: center;
+
+    &:focus {
+      border-color: #495057;
+      box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+    }
+  }
+
+  // Binary operators
+  .binary-op {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  // Unary operators
+  .unary-op {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  // Function calls
+  .function-call {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  // If statements
+  .if-statement {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  // Switch statements
+  .switch-statement {
+    display: inline-block;
+
+    .keyword {
+      margin-right: 0.5rem;
+    }
+
+    .btn-sm {
+      padding: 0.125rem 0.375rem;
+      font-size: 0.75rem;
+      line-height: 1.2;
+
+      i {
+        font-size: 0.85rem;
+      }
+    }
+
+    .btn-outline-success {
+      border-color: #28a745;
+      color: #28a745;
+
+      &:hover {
+        background: #28a745;
+        color: white;
+      }
+    }
+
+    .btn-outline-danger {
+      border-color: #dc3545;
+      color: #dc3545;
+
+      &:hover {
+        background: #dc3545;
+        color: white;
+      }
+    }
+  }
+
+  // Form controls styling
+  .form-select, .form-control {
+    &.form-select-sm, &.form-control-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+      border-radius: 0.25rem;
+    }
+  }
+
+  // Generated expression
+  .generated-expression {
+    pre {
+      margin: 0;
+      font-size: 0.85rem;
+      max-height: 150px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+
+      code {
+        color: #212529;
+      }
+    }
+  }
+
+  // Preview
+  .preview {
+    .preview-result {
+      font-size: 0.95rem;
+
+      code {
+        background: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        border: 1px solid #dee2e6;
+        font-weight: 500;
+      }
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    .expression-flow {
+      font-size: 0.85rem;
+    }
+
+    .keyword {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.4rem;
+    }
+
+    .form-select-sm, .form-control-sm {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// Hover effects
+.inline-node-wrapper {
+  > span {
+    &:hover {
+      > .keyword {
+        background: #0b5ed7;
+      }
+    }
+  }
+}
+
+// Focus states
+select:focus, input:focus {
+  outline: none;
+}
+
+// Bootstrap class overrides for better inline display
+.d-inline-block {
+  vertical-align: middle;
+}
+
+.w-auto {
+  width: auto !important;
+}
