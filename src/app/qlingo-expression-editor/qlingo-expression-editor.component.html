@@ -25,265 +25,22 @@
     </div>
   </div>
 
-  <div class="card-body">
-    <!-- Visual Editor Mode -->
-    <div *ngIf="editMode === 'visual'" class="visual-editor">
+  <!-- Visual Editor Mode - Using Inline Editor -->
+  <div *ngIf="editMode === 'visual'">
+    <app-qlingo-expression-editor-inline
+      [expression]="expression"
+      [availableVariables]="availableVariables"
+      [templateContext]="templateContext"
+      [variables]="variables"
+      [enablePreview]="enablePreview"
+      (expressionChange)="onInlineExpressionChange($event)"
+      (expressionApplied)="expressionApplied.emit($event)">
+    </app-qlingo-expression-editor-inline>
+  </div>
 
-      <!-- Expression Tree Viewer -->
-      <div class="expression-tree mb-3">
-        <div class="tree-container">
-          <ng-container *ngIf="rootNode">
-            <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: rootNode, path: [] }"></ng-container>
-          </ng-container>
-        </div>
-      </div>
-
-      <!-- Node Editor Panel -->
-      <div class="node-editor p-3 border rounded bg-light" *ngIf="selectedNode">
-        <h6 class="mb-3">
-          <i class="bi bi-pencil-square me-2"></i>
-          Edit Node: {{ getNodeLabel(selectedNode) }}
-        </h6>
-
-        <!-- Empty Node - Show options to add content -->
-        <div *ngIf="selectedNode.type === 'Empty'">
-          <button class="btn btn-primary btn-sm" (click)="showOptionsForNode(selectedNode)">
-            <i class="bi bi-plus-circle me-1"></i> Add Expression
-          </button>
-        </div>
-
-        <!-- Literal Node -->
-        <div *ngIf="selectedNode.type === 'Literal'">
-          <div class="mb-2">
-            <label class="form-label fw-bold">Literal Type: {{ selectedNode.dataType }}</label>
-          </div>
-
-          <!-- String Input -->
-          <div *ngIf="selectedNode.dataType === 'string'" class="mb-2">
-            <label class="form-label">String Value:</label>
-            <input
-              type="text"
-              class="form-control form-control-sm"
-              [value]="selectedNode.value"
-              (input)="updateLiteralValue(selectedNode, $any($event.target).value)"
-              placeholder="Enter string value">
-          </div>
-
-          <!-- Number Input -->
-          <div *ngIf="selectedNode.dataType === 'number'" class="mb-2">
-            <label class="form-label">Number Value:</label>
-            <input
-              type="number"
-              class="form-control form-control-sm"
-              [value]="selectedNode.value"
-              (input)="updateLiteralValue(selectedNode, $any($event.target).value)"
-              step="any"
-              placeholder="Enter number">
-          </div>
-
-          <!-- Boolean Input -->
-          <div *ngIf="selectedNode.dataType === 'boolean'" class="mb-2">
-            <label class="form-label">Boolean Value:</label>
-            <select
-              class="form-select form-select-sm"
-              [value]="selectedNode.value"
-              (change)="updateLiteralValue(selectedNode, $any($event.target).value === 'true')">
-              <option [value]="true">TRUE</option>
-              <option [value]="false">FALSE</option>
-            </select>
-          </div>
-
-          <button class="btn btn-secondary btn-sm" (click)="showOptionsForNode(selectedNode)">
-            <i class="bi bi-arrow-repeat me-1"></i> Change Type
-          </button>
-        </div>
-
-        <!-- Variable Node -->
-        <div *ngIf="selectedNode.type === 'Variable'">
-          <div class="mb-2">
-            <label class="form-label">Variable Name:</label>
-            <input
-              *ngIf="availableVariables.length === 0"
-              type="text"
-              class="form-control form-control-sm"
-              [value]="selectedNode.name"
-              (input)="updateVariableName(selectedNode, $any($event.target).value)"
-              placeholder="Enter variable name">
-
-            <select
-              *ngIf="availableVariables.length > 0"
-              class="form-select form-select-sm"
-              [value]="selectedNode.name"
-              (change)="updateVariableName(selectedNode, $any($event.target).value)">
-              <option value="">-- Select Variable --</option>
-              <option *ngFor="let varName of availableVariables" [value]="varName">{{ varName }}</option>
-            </select>
-          </div>
-
-          <button class="btn btn-secondary btn-sm" (click)="showOptionsForNode(selectedNode)">
-            <i class="bi bi-arrow-repeat me-1"></i> Change Type
-          </button>
-        </div>
-
-        <!-- Binary Operator Node -->
-        <div *ngIf="selectedNode.type === 'BinaryOp'">
-          <div class="mb-2">
-            <label class="form-label">Operator:</label>
-            <select
-              class="form-select form-select-sm"
-              [value]="selectedNode.operator"
-              (change)="updateOperator(selectedNode, $any($event.target).value)">
-              <optgroup label="Arithmetic">
-                <option value="+">+ (Add)</option>
-                <option value="-">- (Subtract)</option>
-                <option value="*">* (Multiply)</option>
-                <option value="/">/ (Divide)</option>
-                <option value="%">% (Modulo)</option>
-                <option value="^">^ (Power)</option>
-              </optgroup>
-              <optgroup label="Comparison">
-                <option value="==">=</option>
-                <option value="!=">!=</option>
-                <option value="<">&lt;</option>
-                <option value=">">&gt;</option>
-                <option value="<=">&lt;=</option>
-                <option value=">=">&gt;=</option>
-              </optgroup>
-              <optgroup label="Logical">
-                <option value="AND">AND</option>
-                <option value="OR">OR</option>
-              </optgroup>
-              <optgroup label="String">
-                <option value="&">& (Concatenate)</option>
-              </optgroup>
-            </select>
-          </div>
-
-          <div class="alert alert-info alert-sm mb-2">
-            <small>Click on the left or right side to edit operands</small>
-          </div>
-
-          <button class="btn btn-secondary btn-sm" (click)="showOptionsForNode(selectedNode)">
-            <i class="bi bi-arrow-repeat me-1"></i> Change Type
-          </button>
-        </div>
-
-        <!-- Unary Operator Node -->
-        <div *ngIf="selectedNode.type === 'UnaryOp'">
-          <div class="mb-2">
-            <label class="form-label">Operator:</label>
-            <select
-              class="form-select form-select-sm"
-              [value]="selectedNode.operator"
-              (change)="updateOperator(selectedNode, $any($event.target).value)">
-              <option value="+">+ (Positive)</option>
-              <option value="-">- (Negative)</option>
-              <option value="!">! (NOT)</option>
-              <option value="NOT">NOT</option>
-            </select>
-          </div>
-
-          <button class="btn btn-secondary btn-sm" (click)="showOptionsForNode(selectedNode)">
-            <i class="bi bi-arrow-repeat me-1"></i> Change Type
-          </button>
-        </div>
-
-        <!-- Function Call Node -->
-        <div *ngIf="selectedNode.type === 'FunctionCall'">
-          <div class="mb-2">
-            <label class="form-label fw-bold">Function: {{ selectedNode.name }}</label>
-          </div>
-
-          <div class="mb-2">
-            <label class="form-label">Arguments ({{ selectedNode.args?.length || 0 }}):</label>
-            <div class="d-flex gap-2">
-              <button class="btn btn-success btn-sm" (click)="addFunctionArg(selectedNode)">
-                <i class="bi bi-plus"></i> Add Argument
-              </button>
-              <button
-                class="btn btn-danger btn-sm"
-                (click)="removeFunctionArg(selectedNode, (selectedNode.args?.length || 1) - 1)"
-                [disabled]="!selectedNode.args || selectedNode.args.length === 0">
-                <i class="bi bi-dash"></i> Remove Last
-              </button>
-            </div>
-          </div>
-
-          <div class="alert alert-info alert-sm">
-            <small>Click on argument slots below to edit them</small>
-          </div>
-
-          <button class="btn btn-secondary btn-sm" (click)="showOptionsForNode(selectedNode)">
-            <i class="bi bi-arrow-repeat me-1"></i> Change Function
-          </button>
-        </div>
-
-        <!-- If Statement Node -->
-        <div *ngIf="selectedNode.type === 'If'">
-          <div class="alert alert-info alert-sm">
-            <small>Click on Condition, Then, or Else sections below to edit them</small>
-          </div>
-
-          <button class="btn btn-secondary btn-sm" (click)="showOptionsForNode(selectedNode)">
-            <i class="bi bi-arrow-repeat me-1"></i> Change Type
-          </button>
-        </div>
-
-        <!-- Switch Statement Node -->
-        <div *ngIf="selectedNode.type === 'Switch'">
-          <div class="mb-2">
-            <label class="form-label">Cases ({{ selectedNode.cases?.length || 0 }}):</label>
-            <div class="d-flex gap-2">
-              <button class="btn btn-success btn-sm" (click)="addSwitchCase(selectedNode)">
-                <i class="bi bi-plus"></i> Add Case
-              </button>
-              <button
-                class="btn btn-danger btn-sm"
-                (click)="removeSwitchCase(selectedNode, (selectedNode.cases?.length || 1) - 1)"
-                [disabled]="!selectedNode.cases || selectedNode.cases.length <= 1">
-                <i class="bi bi-dash"></i> Remove Last
-              </button>
-            </div>
-          </div>
-
-          <div class="alert alert-info alert-sm">
-            <small>Click on case values and results below to edit them</small>
-          </div>
-
-          <button class="btn btn-secondary btn-sm" (click)="showOptionsForNode(selectedNode)">
-            <i class="bi bi-arrow-repeat me-1"></i> Change Type
-          </button>
-        </div>
-
-        <!-- Options Modal/Dropdown -->
-        <div *ngIf="showNodeOptions" class="mt-3 border-top pt-3">
-          <h6 class="mb-2">Select Expression Type:</h6>
-          <div class="options-grid">
-            <ng-container *ngFor="let category of optionsByCategory | keyvalue">
-              <div class="option-category mb-3">
-                <div class="fw-bold mb-2 text-primary">{{ category.key }}</div>
-                <div class="d-flex flex-wrap gap-2">
-                  <button
-                    *ngFor="let option of category.value"
-                    class="btn btn-outline-primary btn-sm"
-                    (click)="replaceNodeWithOption(option)"
-                    [title]="option.description || ''">
-                    {{ option.label }}
-                  </button>
-                </div>
-              </div>
-            </ng-container>
-          </div>
-          <button class="btn btn-secondary btn-sm mt-2" (click)="showNodeOptions = false">
-            <i class="bi bi-x"></i> Cancel
-          </button>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Text Editor Mode -->
-    <div *ngIf="editMode === 'text'" class="text-editor">
+  <!-- Text Editor Mode -->
+  <div *ngIf="editMode === 'text'">
+    <div class="card-body">
       <div class="mb-3">
         <label class="form-label fw-bold">QLingo Expression:</label>
         <textarea
@@ -295,173 +52,51 @@
       <button class="btn btn-primary btn-sm" (click)="switchMode('visual')">
         <i class="bi bi-arrow-left-right me-1"></i> Switch to Visual Mode (Parse)
       </button>
+
+      <!-- Generated Expression Display -->
+      <div class="generated-expression mt-3 p-3 bg-light border rounded">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label class="form-label fw-bold mb-0">
+            <i class="bi bi-code-slash me-1"></i> Generated Expression:
+          </label>
+          <button class="btn btn-sm btn-outline-secondary" (click)="reset()">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+          </button>
+        </div>
+        <pre class="mb-0 p-2 bg-white border rounded"><code>{{ generatedExpression || '(empty)' }}</code></pre>
+      </div>
+
+      <!-- Preview -->
+      <div *ngIf="enablePreview" class="preview mt-3 p-3 border rounded"
+           [class.bg-success-subtle]="hasPreviewResult()"
+           [class.bg-danger-subtle]="hasPreviewError()">
+        <label class="form-label fw-bold">
+          <i class="bi bi-eye me-1"></i> Preview Result:
+        </label>
+        <div *ngIf="hasPreviewError()" class="text-danger">
+          <strong>Error:</strong> {{ previewError }}
+        </div>
+        <div *ngIf="hasPreviewResult()" class="preview-result">
+          <strong>Result:</strong>
+          <code class="ms-2">{{ previewResult }}</code>
+          <small class="text-muted ms-2">({{ getTypeOf(previewResult) }})</small>
+        </div>
+        <div *ngIf="isPreviewResultNull()" class="text-muted">
+          <em>Expression evaluates to NULL</em>
+        </div>
+      </div>
     </div>
 
-    <!-- Generated Expression Display -->
-    <div class="generated-expression mt-3 p-3 bg-light border rounded">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <label class="form-label fw-bold mb-0">
-          <i class="bi bi-code-slash me-1"></i> Generated Expression:
-        </label>
-        <button class="btn btn-sm btn-outline-secondary" (click)="reset()">
-          <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+    <!-- Footer Actions -->
+    <div class="card-footer">
+      <div class="d-flex gap-2">
+        <button class="btn btn-success" (click)="applyExpression()">
+          <i class="bi bi-check-circle me-1"></i> Apply Expression
+        </button>
+        <button class="btn btn-secondary" (click)="reset()">
+          <i class="bi bi-x-circle me-1"></i> Cancel
         </button>
       </div>
-      <pre class="mb-0 p-2 bg-white border rounded"><code>{{ generatedExpression || '(empty)' }}</code></pre>
-    </div>
-
-    <!-- Preview -->
-    <div *ngIf="enablePreview" class="preview mt-3 p-3 border rounded"
-         [class.bg-success-subtle]="hasPreviewResult()"
-         [class.bg-danger-subtle]="hasPreviewError()">
-      <label class="form-label fw-bold">
-        <i class="bi bi-eye me-1"></i> Preview Result:
-      </label>
-      <div *ngIf="hasPreviewError()" class="text-danger">
-        <strong>Error:</strong> {{ previewError }}
-      </div>
-      <div *ngIf="hasPreviewResult()" class="preview-result">
-        <strong>Result:</strong>
-        <code class="ms-2">{{ previewResult }}</code>
-        <small class="text-muted ms-2">({{ getTypeOf(previewResult) }})</small>
-      </div>
-      <div *ngIf="isPreviewResultNull()" class="text-muted">
-        <em>Expression evaluates to NULL</em>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Footer Actions -->
-  <div class="card-footer">
-    <div class="d-flex gap-2">
-      <button class="btn btn-success" (click)="applyExpression()">
-        <i class="bi bi-check-circle me-1"></i> Apply Expression
-      </button>
-      <button class="btn btn-secondary" (click)="reset()">
-        <i class="bi bi-x-circle me-1"></i> Cancel
-      </button>
     </div>
   </div>
 </div>
-
-<!-- Recursive Template for Expression Tree -->
-<ng-template #nodeTemplate let-node let-path="path">
-  <div class="node-wrapper">
-    <div
-      [ngClass]="getNodeClass(node)"
-      (click)="selectNode(node, path); $event.stopPropagation()">
-
-      <!-- Empty Node -->
-      <span *ngIf="node.type === 'Empty'" class="node-label empty-label">
-        <i class="bi bi-plus-circle-dotted me-1"></i>
-        {{ getNodeLabel(node) }}
-      </span>
-
-      <!-- Literal Node -->
-      <span *ngIf="node.type === 'Literal'" class="node-label literal-label">
-        <i class="bi bi-quote me-1"></i>
-        {{ getNodeLabel(node) }}
-      </span>
-
-      <!-- Variable Node -->
-      <span *ngIf="node.type === 'Variable'" class="node-label variable-label">
-        <i class="bi bi-at me-1"></i>
-        {{ getNodeLabel(node) }}
-      </span>
-
-      <!-- Binary Operator -->
-      <div *ngIf="node.type === 'BinaryOp'" class="node-binary">
-        <div class="operator-label mb-2">
-          <i class="bi bi-calculator me-1"></i>
-          <strong>{{ node.operator }}</strong>
-        </div>
-        <div class="d-flex gap-3 align-items-center">
-          <div class="operand">
-            <small class="text-muted d-block mb-1">Left:</small>
-            <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node.left, path: path.concat([0]) }"></ng-container>
-          </div>
-          <div class="operator-symbol text-primary">{{ node.operator }}</div>
-          <div class="operand">
-            <small class="text-muted d-block mb-1">Right:</small>
-            <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node.right, path: path.concat([1]) }"></ng-container>
-          </div>
-        </div>
-      </div>
-
-      <!-- Unary Operator -->
-      <div *ngIf="node.type === 'UnaryOp'" class="node-unary">
-        <div class="operator-label mb-2">
-          <strong>{{ node.operator }}</strong>
-        </div>
-        <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node.operand, path: path.concat([0]) }"></ng-container>
-      </div>
-
-      <!-- Function Call -->
-      <div *ngIf="node.type === 'FunctionCall'" class="node-function">
-        <div class="function-name mb-2">
-          <i class="bi bi-box me-1"></i>
-          <strong>{{ node.name }}()</strong>
-        </div>
-        <div class="function-args">
-          <div *ngFor="let arg of node.args; let i = index" class="arg-item mb-2">
-            <small class="text-muted d-block mb-1">Arg {{ i + 1 }}:</small>
-            <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: arg, path: path.concat([i]) }"></ng-container>
-          </div>
-        </div>
-      </div>
-
-      <!-- If Statement -->
-      <div *ngIf="node.type === 'If'" class="node-if">
-        <div class="if-label mb-2">
-          <i class="bi bi-question-circle me-1"></i>
-          <strong>If/Then/Else</strong>
-        </div>
-        <div class="if-sections">
-          <div class="if-section mb-2">
-            <small class="text-muted d-block mb-1">Condition:</small>
-            <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node.condition, path: path.concat([0]) }"></ng-container>
-          </div>
-          <div class="if-section mb-2">
-            <small class="text-success d-block mb-1">Then:</small>
-            <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node.consequent, path: path.concat([1]) }"></ng-container>
-          </div>
-          <div class="if-section" *ngIf="node.alternate">
-            <small class="text-danger d-block mb-1">Else:</small>
-            <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node.alternate, path: path.concat([2]) }"></ng-container>
-          </div>
-        </div>
-      </div>
-
-      <!-- Switch Statement -->
-      <div *ngIf="node.type === 'Switch'" class="node-switch">
-        <div class="switch-label mb-2">
-          <i class="bi bi-list-check me-1"></i>
-          <strong>Switch/Case</strong>
-        </div>
-        <div class="switch-sections">
-          <div class="switch-section mb-2">
-            <small class="text-muted d-block mb-1">Value:</small>
-            <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node.discriminant, path: path.concat([0]) }"></ng-container>
-          </div>
-          <div *ngFor="let case of node.cases; let i = index" class="case-section mb-2 ps-3 border-start border-primary">
-            <small class="text-primary d-block mb-1">Case {{ i + 1 }}:</small>
-            <div class="mb-1">
-              <small class="text-muted">When:</small>
-              <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: case.test, path: path.concat([i * 2 + 1]) }"></ng-container>
-            </div>
-            <div>
-              <small class="text-muted">Then:</small>
-              <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: case.consequent, path: path.concat([i * 2 + 2]) }"></ng-container>
-            </div>
-          </div>
-          <div *ngIf="node.default" class="default-section ps-3 border-start border-secondary">
-            <small class="text-secondary d-block mb-1">Default:</small>
-            <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node.default, path: path.concat([node.cases!.length * 2 + 1]) }"></ng-container>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</ng-template>

@@ -447,6 +447,14 @@ export class QlingoExpressionEditorComponent implements OnInit {
   }
 
   /**
+   * Handle expression change from inline editor
+   */
+  onInlineExpressionChange(expression: string): void {
+    this.generatedExpression = expression;
+    this.expressionChange.emit(expression);
+  }
+
+  /**
    * Apply the expression
    */
   applyExpression(): void {

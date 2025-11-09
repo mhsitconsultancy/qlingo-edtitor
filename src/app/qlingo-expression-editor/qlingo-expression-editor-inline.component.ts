@@ -444,6 +444,25 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
         // Remove else branch
         node.alternate = undefined;
         this.updateGeneratedExpression();
+      } else if (action === 'convert-to-else') {
+        // Convert Else If to simple Else (keep only the consequent)
+        if (node.alternate && node.alternate.type === 'If') {
+          node.alternate = node.alternate.consequent || { type: 'Empty', nodeType: 'primary' };
+          this.updateGeneratedExpression();
+        }
+      } else if (action === 'convert-to-else-if') {
+        // Convert simple Else to Else If
+        if (node.alternate && node.alternate.type !== 'If') {
+          const currentAlternate = node.alternate;
+          node.alternate = {
+            type: 'If',
+            nodeType: 'primary',
+            condition: { type: 'Empty', nodeType: 'primary' },
+            consequent: currentAlternate,
+            alternate: undefined
+          };
+          this.updateGeneratedExpression();
+        }
       }
     }
   }

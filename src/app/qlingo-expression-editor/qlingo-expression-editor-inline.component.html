@@ -382,8 +382,10 @@
       <span class="paren">(</span>
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.condition, path: path.concat([0]) }"></ng-container>
       <span class="paren">)</span>
-      <span class="keyword ms-2">[Then]</span>
+      <span class="brace ms-2">{{ '{' }}</span>
+      <span class="keyword ms-1">Then</span>
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.consequent, path: path.concat([1]) }"></ng-container>
+      <span class="brace ms-1">{{ '}' }}</span>
 
       <!-- Else If (when alternate is another If statement) -->
       <span *ngIf="node.alternate && node.alternate.type === 'If'" class="ms-2">
@@ -393,13 +395,15 @@
           <option value="has-else-if">[Else If ▼]</option>
           <optgroup label="Actions">
             <option value="remove-else">Remove Else If</option>
+            <option value="convert-to-else">Convert to Else</option>
           </optgroup>
         </select>
         <span class="paren">(</span>
         <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.alternate.condition, path: path.concat([2, 0]) }"></ng-container>
         <span class="paren">)</span>
-        <span class="keyword ms-2">[Then]</span>
+        <span class="brace ms-2">{{ '{' }}</span>
         <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.alternate.consequent, path: path.concat([2, 1]) }"></ng-container>
+        <span class="brace ms-1">{{ '}' }}</span>
         <!-- Recursively handle else-if chain or final else -->
         <ng-container *ngIf="node.alternate.alternate && node.alternate.alternate.type === 'If'">
           <!-- Another Else If in the chain - render it inline -->
@@ -415,7 +419,9 @@
               <option value="remove-else">Remove Else</option>
             </optgroup>
           </select>
+          <span class="brace ms-2">{{ '{' }}</span>
           <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.alternate.alternate, path: path.concat([2, 2]) }"></ng-container>
+          <span class="brace ms-1">{{ '}' }}</span>
         </span>
         <!-- Add Else to the Else If -->
         <span *ngIf="!node.alternate.alternate" class="ms-2">
@@ -439,9 +445,12 @@
           <option value="has-else">[Else ▼]</option>
           <optgroup label="Actions">
             <option value="remove-else">Remove Else</option>
+            <option value="convert-to-else-if">Convert to Else If</option>
           </optgroup>
         </select>
+        <span class="brace ms-2">{{ '{' }}</span>
         <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.alternate, path: path.concat([2]) }"></ng-container>
+        <span class="brace ms-1">{{ '}' }}</span>
       </span>
 
       <!-- No Else/Else If yet -->
@@ -486,12 +495,15 @@
       <span class="paren">(</span>
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.discriminant, path: path.concat([0]) }"></ng-container>
       <span class="paren">)</span>
+      <span class="brace ms-2">{{ '{' }}</span>
       <div class="ms-4 mt-2">
-        <div *ngFor="let case of node.cases; let i = index" class="mb-2 d-flex align-items-center gap-2">
-          <span class="keyword">[Case]</span>
+        <div *ngFor="let case of node.cases; let i = index" class="mb-2 d-flex align-items-center gap-2 flex-wrap">
+          <span class="keyword">Case</span>
           <ng-container *ngTemplateOutlet="inlineNode; context: { node: case.test, path: path.concat([i * 2 + 1]) }"></ng-container>
           <span class="colon">:</span>
+          <span class="brace">{{ '{' }}</span>
           <ng-container *ngTemplateOutlet="inlineNode; context: { node: case.consequent, path: path.concat([i * 2 + 2]) }"></ng-container>
+          <span class="brace">{{ '}' }}</span>
           <button *ngIf="node.cases!.length > 1"
                   class="btn btn-sm btn-outline-danger ms-2"
                   (click)="removeSwitchCase(path, i)"
@@ -506,10 +518,12 @@
             <i class="bi bi-plus-circle me-1"></i> Add Case
           </button>
         </div>
-        <div *ngIf="node.default" class="mb-2 d-flex align-items-center gap-2">
-          <span class="keyword">[Default]</span>
+        <div *ngIf="node.default" class="mb-2 d-flex align-items-center gap-2 flex-wrap">
+          <span class="keyword">Default</span>
           <span class="colon">:</span>
+          <span class="brace">{{ '{' }}</span>
           <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.default, path: path.concat([node.cases!.length * 2 + 1]) }"></ng-container>
+          <span class="brace">{{ '}' }}</span>
           <button class="btn btn-sm btn-outline-danger ms-2"
                   (click)="removeSwitchDefault(path)"
                   title="Remove default case">
@@ -524,6 +538,7 @@
           </button>
         </div>
       </div>
+      <span class="brace">{{ '}' }}</span>
     </span>
 
     <!-- Block Statement - render contents without braces -->
