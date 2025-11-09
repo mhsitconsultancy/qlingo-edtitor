@@ -4,8 +4,8 @@ import {
   ExpressionNode,
   ExpressionOption,
   ExpressionContext
-} from '../../services/qlingo-expression-builder.service';
-import { QLingoInterpreter } from '../../services/qlingo-interpreter';
+} from '../qlingo-expression-builder.service';
+import { QLingoInterpreter } from '../qlingo-interpreter';
 
 /**
  * Interactive structured editor for QLingo expressions
@@ -15,7 +15,8 @@ import { QLingoInterpreter } from '../../services/qlingo-interpreter';
 @Component({
   selector: 'app-qlingo-expression-editor',
   templateUrl: './qlingo-expression-editor.component.html',
-  styleUrls: ['./qlingo-expression-editor.component.scss']
+  styleUrls: ['./qlingo-expression-editor.component.scss'],
+  standalone: false
 })
 export class QlingoExpressionEditorComponent implements OnInit {
 

@@ -181,7 +181,8 @@ import { Component } from '@angular/core';
       display: block;
       font-size: 0.85rem;
     }
-  `]
+  `],
+  standalone: false
 })
 export class QlingoExpressionEditorDemoComponent {
 

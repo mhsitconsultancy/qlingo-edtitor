@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { QlingoExpressionEditorComponent } from './qlingo-expression-editor.component';
 import { QlingoExpressionEditorInlineComponent } from './qlingo-expression-editor-inline.component';
 import { QlingoExpressionEditorDemoComponent } from './qlingo-expression-editor-demo.component';
-import { QLingoExpressionBuilderService } from '../../services/qlingo-expression-builder.service';
+import { QLingoExpressionBuilderService } from '../qlingo-expression-builder.service';
 
 @NgModule({
   declarations: [

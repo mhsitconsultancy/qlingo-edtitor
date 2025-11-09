@@ -3,8 +3,8 @@ import {
   QLingoExpressionBuilderService,
   ExpressionNode,
   ExpressionOption
-} from '../../services/qlingo-expression-builder.service';
-import { QLingoInterpreter } from '../../services/qlingo-interpreter';
+} from '../qlingo-expression-builder.service';
+import { QLingoInterpreter } from '../qlingo-interpreter';
 
 /**
  * Inline expression editor - displays expression as a flow with dropdowns and inputs
@@ -12,7 +12,8 @@ import { QLingoInterpreter } from '../../services/qlingo-interpreter';
 @Component({
   selector: 'app-qlingo-expression-editor-inline',
   templateUrl: './qlingo-expression-editor-inline.component.html',
-  styleUrls: ['./qlingo-expression-editor-inline.component.scss']
+  styleUrls: ['./qlingo-expression-editor-inline.component.scss'],
+  standalone: false
 })
 export class QlingoExpressionEditorInlineComponent implements OnInit {
 
