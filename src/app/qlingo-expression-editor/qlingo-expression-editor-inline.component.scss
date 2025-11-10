@@ -26,7 +26,7 @@
 
   // Keyword dropdowns - styled to look like keywords
   .keyword-dropdown {
-    display: inline-block;
+    display: inline-block !important;
     padding: 0.25rem 0.5rem;
     background: #0d6efd;
     color: white;
@@ -36,8 +36,9 @@
     font-size: 0.85rem;
     white-space: nowrap;
     cursor: pointer;
-    width: fit-content;
-    min-width: auto;
+    width: auto !important;
+    max-width: max-content !important;
+    min-width: auto !important;
 
     &:hover {
       background: #0b5ed7;

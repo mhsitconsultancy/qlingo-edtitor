@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, AfterViewChecked, ElementRef } from '@angular/core';
 import {
   QLingoExpressionBuilderService,
   ExpressionNode,
@@ -15,7 +15,7 @@ import { QLingoInterpreter } from '../qlingo-interpreter';
   styleUrls: ['./qlingo-expression-editor-inline.component.scss'],
   standalone: false
 })
-export class QlingoExpressionEditorInlineComponent implements OnInit {
+export class QlingoExpressionEditorInlineComponent implements OnInit, AfterViewChecked {
 
   @Input() expression: string = '';
   @Input() availableVariables: string[] = [];
@@ -40,10 +40,43 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
   // Store the original expression to preserve formatting until Edit is clicked
   private originalExpression: string = '';
 
-  constructor(private expressionBuilder: QLingoExpressionBuilderService) { }
+  constructor(
+    private expressionBuilder: QLingoExpressionBuilderService,
+    private elementRef: ElementRef
+  ) { }
 
   ngOnInit(): void {
     this.initializeExpression();
+  }
+
+  ngAfterViewChecked(): void {
+    this.resizeKeywordDropdowns();
+  }
+
+  /**
+   * Dynamically resize keyword dropdowns to fit their selected option text
+   */
+  private resizeKeywordDropdowns(): void {
+    const selects = this.elementRef.nativeElement.querySelectorAll('select.keyword-dropdown');
+    selects.forEach((select: HTMLSelectElement) => {
+      const selectedOption = select.options[select.selectedIndex];
+      if (selectedOption) {
+        const text = selectedOption.text;
+        // Create a temporary span to measure text width
+        const tempSpan = document.createElement('span');
+        tempSpan.style.visibility = 'hidden';
+        tempSpan.style.position = 'absolute';
+        tempSpan.style.whiteSpace = 'nowrap';
+        tempSpan.style.font = window.getComputedStyle(select).font;
+        tempSpan.textContent = text;
+        document.body.appendChild(tempSpan);
+        const textWidth = tempSpan.offsetWidth;
+        document.body.removeChild(tempSpan);
+
+        // Set width to text width plus padding and arrow space (approximately 35px)
+        select.style.width = `${textWidth + 35}px`;
+      }
+    });
   }
 
   initializeExpression(): void {
