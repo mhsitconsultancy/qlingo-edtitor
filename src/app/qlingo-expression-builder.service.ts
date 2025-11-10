@@ -15,18 +15,46 @@ export class QLingoExpressionBuilderService {
    * Parse a QLingo expression into an AST that can be edited
    */
   parseExpression(expression: string, templateContext: any = {}, variables: any = {}): ExpressionNode {
+    // Extract variable syntax mapping before the interpreter processes the expression
+    const variableSyntaxMap = this.extractVariableSyntax(expression);
+
     const interpreter = new QLingoInterpreter(templateContext, variables);
     const processedSource = (interpreter as any).processTemplateMarkers(expression);
     const tokens = (interpreter as any).tokenize(processedSource);
     const ast = (interpreter as any).parse(tokens);
 
-    return this.astToExpressionNode(ast);
+    return this.astToExpressionNode(ast, variableSyntaxMap);
+  }
+
+  /**
+   * Extract variable names and their syntax types from the original expression
+   * Returns a map of variable names to their syntax type ('variable' for @{} or 'datafield' for |->)
+   */
+  private extractVariableSyntax(expression: string): Map<string, string> {
+    const syntaxMap = new Map<string, string>();
+
+    // Match @{VarName} pattern
+    const variablePattern = /@\{([^}]+)\}/g;
+    let match;
+    while ((match = variablePattern.exec(expression)) !== null) {
+      const varName = match[1];
+      syntaxMap.set(varName, 'variable');
+    }
+
+    // Match |->[FieldName] pattern
+    const datafieldPattern = /\|->\[([^\]]+)\]/g;
+    while ((match = datafieldPattern.exec(expression)) !== null) {
+      const varName = match[1];
+      syntaxMap.set(varName, 'datafield');
+    }
+
+    return syntaxMap;
   }
 
   /**
    * Convert interpreter AST to our editable expression node structure
    */
-  private astToExpressionNode(ast: any): ExpressionNode {
+  private astToExpressionNode(ast: any, variableSyntaxMap?: Map<string, string>): ExpressionNode {
     if (!ast) {
       return { type: 'Empty', nodeType: 'primary' };
     }
@@ -41,19 +69,10 @@ export class QLingoExpressionBuilderService {
         };
 
       case 'Variable':
-        // Detect varType based on AST properties or syntax
-        // The QLingo interpreter may provide a 'syntax' or 'binding' property
+        // Look up the variable syntax from the map
         let varType: string = 'datafield'; // Default to datafield
-
-        // Check if AST has syntax indicator
-        if (ast.syntax === 'variable' || ast.binding === '@') {
-          varType = 'variable';
-        } else if (ast.syntax === 'datafield' || ast.binding === '|->') {
-          varType = 'datafield';
-        }
-        // If no indicator, check the original name format if available
-        else if (ast.originalSyntax) {
-          varType = ast.originalSyntax.startsWith('@{') ? 'variable' : 'datafield';
+        if (variableSyntaxMap && variableSyntaxMap.has(ast.name)) {
+          varType = variableSyntaxMap.get(ast.name)!;
         }
 
         return {
@@ -75,8 +94,8 @@ export class QLingoExpressionBuilderService {
           type: 'BinaryOp',
           nodeType: 'operator',
           operator: ast.op,
-          left: this.astToExpressionNode(ast.left),
-          right: this.astToExpressionNode(ast.right)
+          left: this.astToExpressionNode(ast.left, variableSyntaxMap),
+          right: this.astToExpressionNode(ast.right, variableSyntaxMap)
         };
 
       case 'UnaryOp':
@@ -84,7 +103,7 @@ export class QLingoExpressionBuilderService {
           type: 'UnaryOp',
           nodeType: 'operator',
           operator: ast.op,
-          operand: this.astToExpressionNode(ast.operand)
+          operand: this.astToExpressionNode(ast.operand, variableSyntaxMap)
         };
 
       case 'FunctionCall':
@@ -92,35 +111,35 @@ export class QLingoExpressionBuilderService {
           type: 'FunctionCall',
           nodeType: 'function',
           name: ast.name,
-          args: ast.args.map((arg: any) => this.astToExpressionNode(arg))
+          args: ast.args.map((arg: any) => this.astToExpressionNode(arg, variableSyntaxMap))
         };
 
       case 'If':
         return {
           type: 'If',
           nodeType: 'control-flow',
-          condition: this.astToExpressionNode(ast.condition),
-          consequent: this.astToExpressionNode(ast.consequent),
-          alternate: ast.alternate ? this.astToExpressionNode(ast.alternate) : undefined
+          condition: this.astToExpressionNode(ast.condition, variableSyntaxMap),
+          consequent: this.astToExpressionNode(ast.consequent, variableSyntaxMap),
+          alternate: ast.alternate ? this.astToExpressionNode(ast.alternate, variableSyntaxMap) : undefined
         };
 
       case 'Switch':
         return {
           type: 'Switch',
           nodeType: 'control-flow',
-          discriminant: this.astToExpressionNode(ast.discriminant),
+          discriminant: this.astToExpressionNode(ast.discriminant, variableSyntaxMap),
           cases: ast.cases.map((c: any) => ({
-            test: this.astToExpressionNode(c.test),
-            consequent: this.astToExpressionNode(c.consequent)
+            test: this.astToExpressionNode(c.test, variableSyntaxMap),
+            consequent: this.astToExpressionNode(c.consequent, variableSyntaxMap)
           })),
-          default: ast.default ? this.astToExpressionNode(ast.default) : undefined
+          default: ast.default ? this.astToExpressionNode(ast.default, variableSyntaxMap) : undefined
         };
 
       case 'Block':
         return {
           type: 'Block',
           nodeType: 'block',
-          body: ast.body.map((stmt: any) => this.astToExpressionNode(stmt))
+          body: ast.body.map((stmt: any) => this.astToExpressionNode(stmt, variableSyntaxMap))
         };
 
       default:
