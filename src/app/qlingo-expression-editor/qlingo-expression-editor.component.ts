@@ -80,6 +80,10 @@ export class QlingoExpressionEditorComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeExpression();
+    // Initialize textExpression with original to ensure it's available when switching to text mode
+    if (!this.textExpression) {
+      this.textExpression = this.originalTextExpression;
+    }
   }
 
   /**
@@ -114,6 +118,11 @@ export class QlingoExpressionEditorComponent implements OnInit {
           this.updatePreview();
         }
       }
+
+      // Also sync textExpression if it hasn't been set yet
+      if (!this.textExpression) {
+        this.textExpression = this.originalTextExpression;
+      }
     } catch (error: any) {
       console.error('Failed to parse expression:', error);
       // Fall back to empty expression
@@ -122,6 +131,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
       this.selectedNodePath = [];
       this.expressionWasEdited = false;
       this.generatedExpression = '';
+      this.textExpression = '';
     }
   }
 
@@ -463,24 +473,33 @@ export class QlingoExpressionEditorComponent implements OnInit {
    */
   switchMode(mode: 'visual' | 'text'): void {
     if (mode === 'text' && this.editMode === 'visual') {
-      // Switching to text mode - preserve original formatting if not edited
+      // Switching to text mode - always use textExpression as-is
+      // If not edited, textExpression should already have the original value
+      // If edited, it would have been updated by onInlineExpressionChange
       if (this.expressionWasEdited) {
+        // Expression was edited in visual mode, use regenerated version
         this.textExpression = this.generatedExpression;
         this.originalTextExpression = this.generatedExpression;
       } else {
-        this.textExpression = this.originalTextExpression;
+        // Not edited - textExpression should already have original from last time we were in text mode
+        // If this is the first switch to text mode, use originalTextExpression
+        if (!this.textExpression || this.textExpression.trim() === '') {
+          this.textExpression = this.originalTextExpression;
+        }
       }
     } else if (mode === 'visual' && this.editMode === 'text') {
-      // Switching to visual mode - parse text and store as original
-      try {
+      // Switching to visual mode - update expression input for inline editor
+      // Don't call initializeExpression - let inline editor handle it
+      if (!this.expressionWasEdited) {
+        // Save what's in the text box as the new original
         this.originalTextExpression = this.textExpression;
-        this.expression = this.textExpression;
-        this.expressionWasEdited = false;
-        this.initializeExpression();
-      } catch (error: any) {
-        alert('Failed to parse expression: ' + error.message);
-        return;
       }
+      // Update the expression that will be passed to inline editor
+      this.expression = this.textExpression;
+      this.generatedExpression = this.textExpression;
+
+      // Mark as not edited so inline editor stays in read-only mode
+      this.expressionWasEdited = false;
     }
     this.editMode = mode;
   }
