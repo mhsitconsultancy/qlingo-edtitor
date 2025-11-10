@@ -37,6 +37,9 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
   // Read-only mode - starts as true, user must click Edit to enable editing
   readOnlyMode: boolean = true;
 
+  // Store the original expression to preserve formatting until Edit is clicked
+  private originalExpression: string = '';
+
   constructor(private expressionBuilder: QLingoExpressionBuilderService) { }
 
   ngOnInit(): void {
@@ -45,6 +48,9 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
 
   initializeExpression(): void {
     try {
+      // Store the original expression to preserve formatting
+      this.originalExpression = this.expression || '';
+
       if (this.expression && this.expression.trim()) {
         this.rootNode = this.expressionBuilder.parseExpression(
           this.expression,
@@ -54,7 +60,18 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
       } else {
         this.rootNode = { type: 'Empty', nodeType: 'primary' };
       }
-      this.updateGeneratedExpression();
+
+      // In read-only mode, use the original expression
+      // Only regenerate when entering edit mode
+      if (this.readOnlyMode) {
+        this.generatedExpression = this.originalExpression;
+      } else {
+        this.updateGeneratedExpression();
+      }
+
+      if (this.enablePreview) {
+        this.updatePreview();
+      }
     } catch (error: any) {
       console.error('Failed to parse expression:', error);
       this.rootNode = { type: 'Empty', nodeType: 'primary' };
@@ -79,10 +96,17 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
    */
   toggleEditMode(): void {
     this.readOnlyMode = !this.readOnlyMode;
-    // If switching to edit mode, update the generated expression
-    if (!this.readOnlyMode && this.rootNode) {
-      this.generatedExpression = this.expressionBuilder.nodeToExpression(this.rootNode);
-      this.expressionChange.emit(this.generatedExpression);
+
+    if (!this.readOnlyMode) {
+      // Switching to edit mode - regenerate expression from node tree
+      if (this.rootNode) {
+        this.generatedExpression = this.expressionBuilder.nodeToExpression(this.rootNode);
+        this.expressionChange.emit(this.generatedExpression);
+      }
+    } else {
+      // Switching to read-only mode (locking) - store current expression as original
+      // This preserves any edits that were made
+      this.originalExpression = this.generatedExpression;
     }
   }
 
