@@ -65,6 +65,10 @@ export class QlingoExpressionEditorComponent implements OnInit {
   editMode: 'visual' | 'text' = 'visual';
   textExpression: string = '';
 
+  // Store the original text to preserve formatting until edited
+  private originalTextExpression: string = '';
+  private expressionWasEdited: boolean = false;
+
   // UI state
   showNodeOptions: boolean = false;
   availableOptions: ExpressionOption[] = [];
@@ -83,7 +87,9 @@ export class QlingoExpressionEditorComponent implements OnInit {
    */
   initializeExpression(): void {
     try {
+      // Store the original expression to preserve formatting
       if (this.expression && this.expression.trim()) {
+        this.originalTextExpression = this.expression;
         this.rootNode = this.expressionBuilder.parseExpression(
           this.expression,
           this.templateContext,
@@ -91,10 +97,12 @@ export class QlingoExpressionEditorComponent implements OnInit {
         );
       } else {
         // Start with an empty expression
+        this.originalTextExpression = '';
         this.rootNode = { type: 'Empty', nodeType: 'primary' };
       }
       this.selectedNode = this.rootNode;
       this.selectedNodePath = [];
+      this.expressionWasEdited = false;
       this.updateGeneratedExpression();
     } catch (error: any) {
       console.error('Failed to parse expression:', error);
@@ -102,6 +110,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
       this.rootNode = { type: 'Empty', nodeType: 'primary' };
       this.selectedNode = this.rootNode;
       this.selectedNodePath = [];
+      this.expressionWasEdited = false;
     }
   }
 
@@ -199,6 +208,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
     }
 
     this.showNodeOptions = false;
+    this.expressionWasEdited = true;
     this.updateGeneratedExpression();
   }
 
@@ -325,6 +335,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
       } else {
         node.value = value;
       }
+      this.expressionWasEdited = true;
       this.updateGeneratedExpression();
     }
   }
@@ -335,6 +346,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
   updateVariableName(node: ExpressionNode, name: string): void {
     if (node.type === 'Variable' || node.type === 'Identifier') {
       node.name = name;
+      this.expressionWasEdited = true;
       this.updateGeneratedExpression();
     }
   }
@@ -345,6 +357,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
   updateOperator(node: ExpressionNode, operator: string): void {
     if (node.type === 'BinaryOp' || node.type === 'UnaryOp') {
       node.operator = operator;
+      this.expressionWasEdited = true;
       this.updateGeneratedExpression();
     }
   }
@@ -358,6 +371,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
         test: { type: 'Empty', nodeType: 'primary' },
         consequent: { type: 'Empty', nodeType: 'primary' }
       });
+      this.expressionWasEdited = true;
       this.updateGeneratedExpression();
     }
   }
@@ -368,6 +382,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
   removeSwitchCase(node: ExpressionNode, index: number): void {
     if (node.type === 'Switch' && node.cases!.length > 1) {
       node.cases!.splice(index, 1);
+      this.expressionWasEdited = true;
       this.updateGeneratedExpression();
     }
   }
@@ -378,6 +393,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
   addFunctionArg(node: ExpressionNode): void {
     if (node.type === 'FunctionCall') {
       node.args!.push({ type: 'Empty', nodeType: 'primary' });
+      this.expressionWasEdited = true;
       this.updateGeneratedExpression();
     }
   }
@@ -388,6 +404,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
   removeFunctionArg(node: ExpressionNode, index: number): void {
     if (node.type === 'FunctionCall' && node.args!.length > 0) {
       node.args!.splice(index, 1);
+      this.expressionWasEdited = true;
       this.updateGeneratedExpression();
     }
   }
@@ -431,12 +448,19 @@ export class QlingoExpressionEditorComponent implements OnInit {
    */
   switchMode(mode: 'visual' | 'text'): void {
     if (mode === 'text' && this.editMode === 'visual') {
-      // Switching to text mode
-      this.textExpression = this.generatedExpression;
+      // Switching to text mode - preserve original formatting if not edited
+      if (this.expressionWasEdited) {
+        this.textExpression = this.generatedExpression;
+        this.originalTextExpression = this.generatedExpression;
+      } else {
+        this.textExpression = this.originalTextExpression;
+      }
     } else if (mode === 'visual' && this.editMode === 'text') {
-      // Switching to visual mode - parse text
+      // Switching to visual mode - parse text and store as original
       try {
+        this.originalTextExpression = this.textExpression;
         this.expression = this.textExpression;
+        this.expressionWasEdited = false;
         this.initializeExpression();
       } catch (error: any) {
         alert('Failed to parse expression: ' + error.message);
@@ -451,6 +475,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
    */
   onInlineExpressionChange(expression: string): void {
     this.generatedExpression = expression;
+    this.expressionWasEdited = true;
     this.expressionChange.emit(expression);
   }
 
