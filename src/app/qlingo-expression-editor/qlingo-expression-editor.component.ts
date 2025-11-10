@@ -103,7 +103,17 @@ export class QlingoExpressionEditorComponent implements OnInit {
       this.selectedNode = this.rootNode;
       this.selectedNodePath = [];
       this.expressionWasEdited = false;
-      this.updateGeneratedExpression();
+
+      // Use original expression until edited, then regenerate
+      if (this.expressionWasEdited || !this.originalTextExpression) {
+        this.updateGeneratedExpression();
+      } else {
+        this.generatedExpression = this.originalTextExpression;
+        // Still update preview but don't emit changes
+        if (this.enablePreview) {
+          this.updatePreview();
+        }
+      }
     } catch (error: any) {
       console.error('Failed to parse expression:', error);
       // Fall back to empty expression
@@ -111,6 +121,7 @@ export class QlingoExpressionEditorComponent implements OnInit {
       this.selectedNode = this.rootNode;
       this.selectedNodePath = [];
       this.expressionWasEdited = false;
+      this.generatedExpression = '';
     }
   }
 
@@ -120,7 +131,11 @@ export class QlingoExpressionEditorComponent implements OnInit {
   updateGeneratedExpression(): void {
     if (this.rootNode) {
       this.generatedExpression = this.expressionBuilder.nodeToExpression(this.rootNode);
-      this.expressionChange.emit(this.generatedExpression);
+
+      // Only emit changes if expression was edited
+      if (this.expressionWasEdited) {
+        this.expressionChange.emit(this.generatedExpression);
+      }
 
       // Update preview if enabled
       if (this.enablePreview) {
