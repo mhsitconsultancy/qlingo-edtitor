@@ -235,19 +235,61 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
 
   private createFunctionOption(funcName: string): ExpressionOption {
     const functions: { [key: string]: { name: string; paramCount: number } } = {
-      'abs': { name: 'Abs', paramCount: 1 },
+      // Numeric Functions
+      'abs': { name: 'ABS', paramCount: 1 },
       'ceil': { name: 'Ceil', paramCount: 1 },
       'floor': { name: 'Floor', paramCount: 1 },
       'round': { name: 'Round', paramCount: 2 },
+      'formatnumber': { name: 'FormatNumber', paramCount: 3 },
+      'rand': { name: 'Rand', paramCount: 1 },
       'max': { name: 'Max', paramCount: 2 },
       'min': { name: 'Min', paramCount: 2 },
+
+      // String Functions
       'ucase': { name: 'UCase', paramCount: 1 },
       'lcase': { name: 'LCase', paramCount: 1 },
       'tcase': { name: 'TCase', paramCount: 1 },
       'length': { name: 'Length', paramCount: 1 },
-      'trim': { name: 'Trim', paramCount: 1 },
-      'substring': { name: 'SubString', paramCount: 3 },
       'isnullorempty': { name: 'IsNullOrEmpty', paramCount: 1 },
+      'substring': { name: 'SubString', paramCount: 3 },
+      'trim': { name: 'Trim', paramCount: 1 },
+      'ltrim': { name: 'LTrim', paramCount: 1 },
+      'rtrim': { name: 'RTrim', paramCount: 1 },
+      'find': { name: 'Find', paramCount: 3 },
+      'replace': { name: 'Replace', paramCount: 4 },
+      'findandreplace': { name: 'FindAndReplace', paramCount: 3 },
+      'findandreplacechars': { name: 'FindAndReplaceChars', paramCount: 3 },
+      'findbyregexp': { name: 'FindByRegExp', paramCount: 3 },
+      'findandreplacebyregexp': { name: 'FindAndReplaceByRegExp', paramCount: 4 },
+      'cleannumber': { name: 'CleanNumber', paramCount: 1 },
+      'cleanrecipientkey': { name: 'CleanRecipientKey', paramCount: 2 },
+      'secureid': { name: 'SecureID', paramCount: 0 },
+      'hextounicode': { name: 'HexToUnicode', paramCount: 1 },
+      'htmlencode': { name: 'HtmlEncode', paramCount: 1 },
+
+      // Date Functions
+      'getday': { name: 'GetDay', paramCount: 1 },
+      'getmonth': { name: 'GetMonth', paramCount: 1 },
+      'getyear': { name: 'GetYear', paramCount: 1 },
+      'getdayofweek': { name: 'GetDayOfWeek', paramCount: 1 },
+      'gethour': { name: 'GetHour', paramCount: 1 },
+      'getminute': { name: 'GetMinute', paramCount: 1 },
+      'getsecond': { name: 'GetSecond', paramCount: 1 },
+      'age': { name: 'Age', paramCount: 1 },
+      'now': { name: 'Now', paramCount: 0 },
+      'formatdate': { name: 'FormatDate', paramCount: 2 },
+
+      // Conversion Functions
+      'asboolean': { name: 'AsBoolean', paramCount: 1 },
+      'asdate': { name: 'AsDate', paramCount: 1 },
+      'asnumber': { name: 'AsNumber', paramCount: 1 },
+      'asstring': { name: 'AsString', paramCount: 1 },
+      'asjsonarray': { name: 'AsJsonArray', paramCount: -1 },
+
+      // Barcode Function
+      'xmpbarcode': { name: 'XMPBarcode', paramCount: 3 },
+
+      // Utility Functions (legacy)
       'isnull': { name: 'IsNull', paramCount: 1 },
       'isempty': { name: 'IsEmpty', paramCount: 1 }
     };
@@ -571,19 +613,61 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
    */
   getFunctionOptionKey(funcName: string): string {
     const funcMap: { [key: string]: string } = {
-      'Abs': 'func-abs',
+      // Numeric Functions
+      'ABS': 'func-abs',
       'Ceil': 'func-ceil',
       'Floor': 'func-floor',
       'Round': 'func-round',
+      'FormatNumber': 'func-formatnumber',
+      'Rand': 'func-rand',
       'Max': 'func-max',
       'Min': 'func-min',
+
+      // String Functions
       'UCase': 'func-ucase',
       'LCase': 'func-lcase',
       'TCase': 'func-tcase',
       'Length': 'func-length',
-      'Trim': 'func-trim',
-      'SubString': 'func-substring',
       'IsNullOrEmpty': 'func-isnullorempty',
+      'SubString': 'func-substring',
+      'Trim': 'func-trim',
+      'LTrim': 'func-ltrim',
+      'RTrim': 'func-rtrim',
+      'Find': 'func-find',
+      'Replace': 'func-replace',
+      'FindAndReplace': 'func-findandreplace',
+      'FindAndReplaceChars': 'func-findandreplacechars',
+      'FindByRegExp': 'func-findbyregexp',
+      'FindAndReplaceByRegExp': 'func-findandreplacebyregexp',
+      'CleanNumber': 'func-cleannumber',
+      'CleanRecipientKey': 'func-cleanrecipientkey',
+      'SecureID': 'func-secureid',
+      'HexToUnicode': 'func-hextounicode',
+      'HtmlEncode': 'func-htmlencode',
+
+      // Date Functions
+      'GetDay': 'func-getday',
+      'GetMonth': 'func-getmonth',
+      'GetYear': 'func-getyear',
+      'GetDayOfWeek': 'func-getdayofweek',
+      'GetHour': 'func-gethour',
+      'GetMinute': 'func-getminute',
+      'GetSecond': 'func-getsecond',
+      'Age': 'func-age',
+      'Now': 'func-now',
+      'FormatDate': 'func-formatdate',
+
+      // Conversion Functions
+      'AsBoolean': 'func-asboolean',
+      'AsDate': 'func-asdate',
+      'AsNumber': 'func-asnumber',
+      'AsString': 'func-asstring',
+      'AsJsonArray': 'func-asjsonarray',
+
+      // Barcode Function
+      'XMPBarcode': 'func-xmpbarcode',
+
+      // Utility Functions (legacy)
       'IsNull': 'func-isnull',
       'IsEmpty': 'func-isempty'
     };
