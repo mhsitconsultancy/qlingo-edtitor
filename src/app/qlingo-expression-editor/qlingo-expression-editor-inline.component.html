@@ -301,11 +301,6 @@
           <option value="clear">✕ Clear</option>
         </optgroup>
       </select>
-      <button class="btn btn-sm btn-outline-danger ms-1 delete-btn"
-              (click)="clearNode(path)"
-              title="Clear this expression">
-        <i class="bi bi-x-circle"></i>
-      </button>
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.right, path: path.concat([1]) }"></ng-container>
     </span>
 
