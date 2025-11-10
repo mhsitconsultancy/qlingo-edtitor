@@ -74,7 +74,8 @@ export class QlingoExpressionEditorInlineComponent implements OnInit, AfterViewC
         document.body.removeChild(tempSpan);
 
         // Set width to text width plus padding and arrow space (approximately 35px)
-        select.style.width = `${textWidth + 35}px`;
+        // Use setProperty with 'important' to override any CSS rules
+        select.style.setProperty('width', `${textWidth + 35}px`, 'important');
       }
     });
   }

@@ -36,9 +36,9 @@
     font-size: 0.85rem;
     white-space: nowrap;
     cursor: pointer;
-    width: auto !important;
-    max-width: max-content !important;
-    min-width: auto !important;
+    width: auto;
+    max-width: max-content;
+    min-width: auto;
 
     &:hover {
       background: #0b5ed7;
