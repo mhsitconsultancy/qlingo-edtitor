@@ -279,7 +279,7 @@
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.left, path: path.concat([0]) }"></ng-container>
       <select class="form-select form-select-sm d-inline-block w-auto mx-2 operator-select"
               [value]="node.operator"
-              (change)="updateOperator(path, $any($event.target).value)">
+              (change)="updateOperator(path, $any($event.target).value); $any($event.target).value = node.operator">
         <optgroup label="Arithmetic">
           <option value="+">+</option>
           <option value="-">-</option>
@@ -303,21 +303,37 @@
         <optgroup label="String">
           <option value="&">&amp;</option>
         </optgroup>
+        <optgroup label="Actions">
+          <option value="clear">✕ Clear</option>
+        </optgroup>
       </select>
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.right, path: path.concat([1]) }"></ng-container>
+      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
+              (click)="clearNode(path)"
+              title="Clear this expression">
+        <i class="bi bi-x-circle"></i>
+      </button>
     </span>
 
     <!-- Unary Operator -->
     <span *ngIf="node.type === 'UnaryOp'" class="unary-op">
       <select class="form-select form-select-sm d-inline-block w-auto me-2 operator-select"
               [value]="node.operator"
-              (change)="updateOperator(path, $any($event.target).value)">
+              (change)="updateOperator(path, $any($event.target).value); $any($event.target).value = node.operator">
         <option value="+">+</option>
         <option value="-">-</option>
         <option value="!">!</option>
         <option value="NOT">NOT</option>
+        <optgroup label="Actions">
+          <option value="clear">✕ Clear</option>
+        </optgroup>
       </select>
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.operand, path: path.concat([0]) }"></ng-container>
+      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
+              (click)="clearNode(path)"
+              title="Clear this expression">
+        <i class="bi bi-x-circle"></i>
+      </button>
     </span>
 
     <!-- Function Call -->

@@ -345,6 +345,14 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
    * Update operator
    */
   updateOperator(path: number[], operator: string): void {
+    if (!operator) return;
+
+    // Handle clear action
+    if (operator === 'clear') {
+      this.clearNode(path);
+      return;
+    }
+
     const node = this.getNodeAtPath(path);
     if (node && (node.type === 'BinaryOp' || node.type === 'UnaryOp')) {
       node.operator = operator;
