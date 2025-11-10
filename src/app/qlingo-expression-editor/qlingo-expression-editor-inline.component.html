@@ -78,6 +78,7 @@
         </optgroup>
         <optgroup label="Variables">
           <option value="variable">Variable</option>
+          <option value="datafield">Data Field</option>
         </optgroup>
         <optgroup label="Functions - Numeric">
           <option value="func-abs">ABS()</option>
@@ -171,6 +172,7 @@
         </optgroup>
         <optgroup label="Change to Variable">
           <option value="variable">Variable</option>
+          <option value="datafield">Data Field</option>
         </optgroup>
         <optgroup label="Change to Function - Numeric">
           <option value="func-abs">ABS()</option>
@@ -275,9 +277,10 @@
     <!-- Variable - Dropdown or input -->
     <span *ngIf="node.type === 'Variable'" class="variable-ref">
       <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown me-1"
-              value="variable"
+              [value]="node.varType || 'datafield'"
               (change)="changeVariableOrType(path, $any($event.target).value)">
         <option value="variable">[Variable ▼]</option>
+        <option value="datafield">[Data Field ▼]</option>
         <optgroup label="Change to Literal">
           <option value="literal-string">String</option>
           <option value="literal-number">Number</option>
@@ -363,25 +366,25 @@
           <option value="clear">✕ Clear</option>
         </optgroup>
       </select>
-      <span class="binding-prefix">|->[</span>
+      <span class="binding-prefix" [innerText]="getVariablePrefix(node.varType)"></span>
       <span class="variable-input-wrapper">
         <input type="text"
                class="form-control form-control-sm d-inline-block variable-input"
                [value]="node.name || ''"
                (input)="updateVariable(path, $any($event.target).value)"
-               [attr.list]="availableVariables.length > 0 ? 'variables-' + getPathId(path) : null"
-               placeholder="Variable ▼">
+               [attr.list]="(!node.varType || node.varType === 'datafield') && availableVariables.length > 0 ? 'variables-' + getPathId(path) : null"
+               [placeholder]="(!node.varType || node.varType === 'datafield') ? 'Field ▼' : 'Variable ▼'">
         <button *ngIf="node.name"
                 class="variable-clear-btn"
                 (click)="updateVariable(path, '')"
-                title="Clear variable">
+                [title]="(!node.varType || node.varType === 'datafield') ? 'Clear field' : 'Clear variable'">
           <i class="bi bi-x"></i>
         </button>
-        <datalist *ngIf="availableVariables.length > 0" [id]="'variables-' + getPathId(path)">
+        <datalist *ngIf="(!node.varType || node.varType === 'datafield') && availableVariables.length > 0" [id]="'variables-' + getPathId(path)">
           <option *ngFor="let varName of availableVariables" [value]="varName">{{ varName }}</option>
         </datalist>
       </span>
-      <span class="binding-suffix">]</span>
+      <span class="binding-suffix" [innerText]="getVariableSuffix(node.varType)"></span>
     </span>
 
     <!-- Binary Operator -->
@@ -507,6 +510,7 @@
         </optgroup>
         <optgroup label="Change to Variable">
           <option value="variable">Variable</option>
+          <option value="datafield">Data Field</option>
         </optgroup>
         <optgroup label="Change to Function">
           <option value="func-isnullorempty">IsNullOrEmpty()</option>
@@ -628,6 +632,7 @@
         </optgroup>
         <optgroup label="Change to Variable">
           <option value="variable">Variable</option>
+          <option value="datafield">Data Field</option>
         </optgroup>
         <optgroup label="Change to Function">
           <option value="func-isnullorempty">IsNullOrEmpty()</option>

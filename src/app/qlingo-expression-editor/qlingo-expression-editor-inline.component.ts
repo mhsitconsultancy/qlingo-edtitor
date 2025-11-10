@@ -215,7 +215,10 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
         break;
 
       case 'variable':
-        return { category: 'Variable', label: 'Variable', type: 'Variable', name: '' };
+        return { category: 'Variable', label: 'Variable', type: 'Variable', name: '', varType: 'variable' };
+
+      case 'datafield':
+        return { category: 'Variable', label: 'Data Field', type: 'Variable', name: '', varType: 'datafield' };
 
       case 'func':
         return this.createFunctionOption(value);
@@ -472,7 +475,18 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
    * Change variable to a different expression type
    */
   changeVariableOrType(path: number[], optionKey: string): void {
-    if (!optionKey || optionKey === 'variable') return;
+    if (!optionKey) return;
+
+    // Handle switching between variable and datafield
+    if (optionKey === 'variable' || optionKey === 'datafield') {
+      const node = this.getNodeAtPath(path);
+      if (node && node.type === 'Variable') {
+        node.varType = optionKey;
+        this.updateGeneratedExpression();
+      }
+      return;
+    }
+
     if (optionKey === 'clear') {
       this.clearNode(path);
       return;
@@ -696,5 +710,26 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
    */
   getPathId(path: number[]): string {
     return path.length === 0 ? 'root' : path.join('-');
+  }
+
+  /**
+   * Get the variable prefix based on varType
+   */
+  getVariablePrefix(varType: string | undefined): string {
+    if (!varType || varType === 'datafield') {
+      return '|->[';
+    }
+    // Using String.fromCharCode to avoid ICU message parsing issues
+    return String.fromCharCode(64) + String.fromCharCode(123); // @ and {
+  }
+
+  /**
+   * Get the variable suffix based on varType
+   */
+  getVariableSuffix(varType: string | undefined): string {
+    if (!varType || varType === 'datafield') {
+      return ']';
+    }
+    return String.fromCharCode(125); // }
   }
 }

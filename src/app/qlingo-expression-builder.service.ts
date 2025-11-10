@@ -496,6 +496,7 @@ export interface ExpressionNode {
 
   // For variables and identifiers
   name?: string;
+  varType?: string; // 'variable' for @{VarName} or 'datafield' for |->[FieldName]
 
   // For binary operators
   operator?: string;
@@ -542,6 +543,7 @@ export interface ExpressionOption {
   dataType?: string;
   value?: any;
   name?: string;
+  varType?: string; // 'variable' for @{VarName} or 'datafield' for |->[FieldName]
   operator?: string;
   description?: string;
   paramCount?: number | number[];
