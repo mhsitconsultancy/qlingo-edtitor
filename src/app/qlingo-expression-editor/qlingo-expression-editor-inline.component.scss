@@ -36,6 +36,7 @@
     font-size: 0.85rem;
     white-space: nowrap;
     cursor: pointer;
+    width: fit-content;
     min-width: auto;
 
     &:hover {
@@ -86,7 +87,8 @@
       background: #f8f9fa;
       color: #28a745;
       font-weight: 500;
-      min-width: 180px;
+      width: fit-content;
+      min-width: auto;
       cursor: pointer;
 
       &:hover {
@@ -108,7 +110,8 @@
     gap: 0.5rem;
 
     .literal-input {
-      min-width: 120px;
+      width: auto;
+      min-width: 60px;
       max-width: 250px;
     }
 
@@ -137,7 +140,8 @@
     }
 
     .variable-select {
-      min-width: 120px;
+      width: auto;
+      min-width: 60px;
       max-width: 200px;
       border: 2px solid #0dcaf0;
       background: #f0f9ff;
@@ -162,7 +166,8 @@
     }
 
     .variable-input {
-      min-width: 120px;
+      width: auto;
+      min-width: 80px;
       max-width: 200px;
       border: 2px solid #0dcaf0;
       background: #f0f9ff;
@@ -225,7 +230,8 @@
 
   // Operators
   .operator-select {
-    min-width: 80px;
+    width: fit-content;
+    min-width: 50px;
     max-width: 120px;
     border: 2px solid #6c757d;
     background: #e9ecef;
