@@ -191,11 +191,6 @@
         <option [value]="true">TRUE</option>
         <option [value]="false">FALSE</option>
       </select>
-      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
-              (click)="clearNode(path)"
-              title="Clear this expression">
-        <i class="bi bi-x-circle"></i>
-      </button>
     </span>
 
     <!-- Variable - Dropdown or input -->
@@ -267,11 +262,6 @@
              (input)="updateVariable(path, $any($event.target).value)"
              placeholder="VariableName">
       <span class="binding-suffix">]</span>
-      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
-              (click)="clearNode(path)"
-              title="Clear this expression">
-        <i class="bi bi-x-circle"></i>
-      </button>
     </span>
 
     <!-- Binary Operator -->
@@ -308,7 +298,7 @@
         </optgroup>
       </select>
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.right, path: path.concat([1]) }"></ng-container>
-      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
+      <button class="btn btn-sm btn-outline-danger ms-1 delete-btn"
               (click)="clearNode(path)"
               title="Clear this expression">
         <i class="bi bi-x-circle"></i>
@@ -329,11 +319,6 @@
         </optgroup>
       </select>
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.operand, path: path.concat([0]) }"></ng-container>
-      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
-              (click)="clearNode(path)"
-              title="Clear this expression">
-        <i class="bi bi-x-circle"></i>
-      </button>
     </span>
 
     <!-- Function Call -->
@@ -387,11 +372,6 @@
         <span *ngIf="!isLast" class="comma">, </span>
       </span>
       <span class="paren">)</span>
-      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
-              (click)="clearNode(path)"
-              title="Clear this expression">
-        <i class="bi bi-x-circle"></i>
-      </button>
     </span>
 
     <!-- If Statement -->
@@ -543,11 +523,6 @@
           <option value="clear">✕ Clear</option>
         </optgroup>
       </select>
-      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
-              (click)="clearNode(path)"
-              title="Clear this expression">
-        <i class="bi bi-x-circle"></i>
-      </button>
       <span class="paren">(</span>
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.discriminant, path: path.concat([0]) }"></ng-container>
       <span class="paren">)</span>
