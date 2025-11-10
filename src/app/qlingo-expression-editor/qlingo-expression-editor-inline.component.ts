@@ -34,6 +34,9 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
   // Track which node is being edited
   editingNodePath: number[] | null = null;
 
+  // Read-only mode - starts as true, user must click Edit to enable editing
+  readOnlyMode: boolean = true;
+
   constructor(private expressionBuilder: QLingoExpressionBuilderService) { }
 
   ngOnInit(): void {
@@ -61,10 +64,25 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
   updateGeneratedExpression(): void {
     if (this.rootNode) {
       this.generatedExpression = this.expressionBuilder.nodeToExpression(this.rootNode);
-      this.expressionChange.emit(this.generatedExpression);
+      // Only emit changes when not in read-only mode
+      if (!this.readOnlyMode) {
+        this.expressionChange.emit(this.generatedExpression);
+      }
       if (this.enablePreview) {
         this.updatePreview();
       }
+    }
+  }
+
+  /**
+   * Toggle between read-only and edit mode
+   */
+  toggleEditMode(): void {
+    this.readOnlyMode = !this.readOnlyMode;
+    // If switching to edit mode, update the generated expression
+    if (!this.readOnlyMode && this.rootNode) {
+      this.generatedExpression = this.expressionBuilder.nodeToExpression(this.rootNode);
+      this.expressionChange.emit(this.generatedExpression);
     }
   }
 

@@ -1,9 +1,20 @@
 <div class="qlingo-inline-editor card">
   <div class="card-header">
-    <h5 class="card-title mb-0">
-      <i class="bi bi-code-square me-2"></i>
-      QLingo Expression Builder
-    </h5>
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">
+        <i class="bi bi-code-square me-2"></i>
+        QLingo Expression Builder
+        <span *ngIf="readOnlyMode" class="badge bg-secondary ms-2">Read Only</span>
+        <span *ngIf="!readOnlyMode" class="badge bg-warning ms-2">Editing</span>
+      </h5>
+      <button class="btn btn-sm"
+              [class.btn-primary]="readOnlyMode"
+              [class.btn-secondary]="!readOnlyMode"
+              (click)="toggleEditMode()">
+        <i class="bi me-1" [class.bi-pencil]="readOnlyMode" [class.bi-lock]="!readOnlyMode"></i>
+        {{ readOnlyMode ? 'Edit' : 'Lock' }}
+      </button>
+    </div>
   </div>
 
   <div class="card-body">
@@ -20,7 +31,7 @@
         <label class="form-label fw-bold mb-0">
           <i class="bi bi-code-slash me-1"></i> Generated Expression:
         </label>
-        <button class="btn btn-sm btn-outline-secondary" (click)="reset()">
+        <button class="btn btn-sm btn-outline-secondary" [disabled]="readOnlyMode" (click)="reset()">
           <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
         </button>
       </div>
@@ -67,6 +78,7 @@
     <!-- Empty Node - Dropdown to select type -->
     <span *ngIf="node.type === 'Empty'" class="empty-slot">
       <select class="form-select form-select-sm d-inline-block w-auto"
+              [disabled]="readOnlyMode"
               (change)="replaceNode(path, $any($event.target).value); $any($event.target).value = ''">
         <option value="">[ {{ getEmptySlotPlaceholder(path) }} ▼ ]</option>
         <optgroup label="Literals">
@@ -162,6 +174,7 @@
     <!-- Literal - Type dropdown + Input field + Delete button -->
     <span *ngIf="node.type === 'Literal'" class="literal-value">
       <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+              [disabled]="readOnlyMode"
               [value]="'literal-' + node.dataType"
               (change)="changeLiteralOrType(path, $any($event.target).value); $any($event.target).value = 'literal-' + node.dataType">
         <optgroup label="Literal Type">
@@ -255,18 +268,21 @@
       <input *ngIf="node.dataType === 'string'"
              type="text"
              class="form-control form-control-sm d-inline-block literal-input"
+             [disabled]="readOnlyMode"
              [value]="node.value"
              (input)="updateLiteral(path, $any($event.target).value)"
              placeholder="Enter text">
       <input *ngIf="node.dataType === 'number'"
              type="number"
              class="form-control form-control-sm d-inline-block literal-input"
+             [disabled]="readOnlyMode"
              [value]="node.value"
              (input)="updateLiteral(path, $any($event.target).value)"
              step="any"
              placeholder="0">
       <select *ngIf="node.dataType === 'boolean'"
               class="form-control form-control-sm d-inline-block literal-input"
+              [disabled]="readOnlyMode"
               [value]="node.value"
               (change)="updateLiteral(path, $any($event.target).value === 'true')">
         <option [value]="true">TRUE</option>
@@ -277,6 +293,7 @@
     <!-- Variable - Dropdown or input -->
     <span *ngIf="node.type === 'Variable'" class="variable-ref">
       <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown me-1"
+              [disabled]="readOnlyMode"
               [value]="node.varType || 'datafield'"
               (change)="changeVariableOrType(path, $any($event.target).value)">
         <option value="variable">[Variable ▼]</option>
@@ -370,11 +387,12 @@
       <span class="variable-input-wrapper">
         <input type="text"
                class="form-control form-control-sm d-inline-block variable-input"
+               [disabled]="readOnlyMode"
                [value]="node.name || ''"
                (input)="updateVariable(path, $any($event.target).value)"
                [attr.list]="(!node.varType || node.varType === 'datafield') && availableVariables.length > 0 ? 'variables-' + getPathId(path) : null"
                [placeholder]="(!node.varType || node.varType === 'datafield') ? 'Field ▼' : 'Variable ▼'">
-        <button *ngIf="node.name"
+        <button *ngIf="node.name && !readOnlyMode"
                 class="variable-clear-btn"
                 (click)="updateVariable(path, '')"
                 [title]="(!node.varType || node.varType === 'datafield') ? 'Clear field' : 'Clear variable'">
@@ -391,6 +409,7 @@
     <span *ngIf="node.type === 'BinaryOp'" class="binary-op">
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.left, path: path.concat([0]) }"></ng-container>
       <select class="form-select form-select-sm d-inline-block w-auto mx-2 operator-select"
+              [disabled]="readOnlyMode"
               [value]="node.operator"
               (change)="updateOperator(path, $any($event.target).value); $any($event.target).value = node.operator">
         <optgroup label="Arithmetic">
@@ -426,6 +445,7 @@
     <!-- Unary Operator -->
     <span *ngIf="node.type === 'UnaryOp'" class="unary-op">
       <select class="form-select form-select-sm d-inline-block w-auto me-2 operator-select"
+              [disabled]="readOnlyMode"
               [value]="node.operator"
               (change)="updateOperator(path, $any($event.target).value); $any($event.target).value = node.operator">
         <option value="+">+ ▼</option>
@@ -442,6 +462,7 @@
     <!-- Function Call -->
     <span *ngIf="node.type === 'FunctionCall'" class="function-call">
       <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+              [disabled]="readOnlyMode"
               [value]="getFunctionOptionKey(node.name)"
               (change)="changeFunctionOrType(path, $any($event.target).value)">
         <option [value]="getFunctionOptionKey(node.name)">[{{ getFunctionDisplayName(node.name) }} ▼]</option>
@@ -547,6 +568,7 @@
     <!-- If Statement -->
     <span *ngIf="node.type === 'If'" class="if-statement">
       <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+              [disabled]="readOnlyMode"
               value="if"
               (change)="changeControlFlowType(path, $any($event.target).value)">
         <option value="if">[If ▼]</option>
@@ -640,7 +662,7 @@
           <option value="clear">✕ Clear</option>
         </optgroup>
       </select>
-      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
+      <button *ngIf="path.length > 0 && !readOnlyMode" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
               (click)="clearNode(path)"
               title="Clear this expression">
         <i class="bi bi-x-circle"></i>
@@ -656,6 +678,7 @@
       <!-- Else If (when alternate is another If statement) -->
       <span *ngIf="node.alternate && node.alternate.type === 'If'" class="ms-2">
         <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+                [disabled]="readOnlyMode"
                 value="has-else-if"
                 (change)="toggleElse(path, $any($event.target).value); $any($event.target).value = 'has-else-if'">
           <option value="has-else-if">[Else If ▼]</option>
@@ -678,6 +701,7 @@
         <!-- Final Else (not an If) -->
         <span *ngIf="node.alternate.alternate && node.alternate.alternate.type !== 'If'" class="ms-2">
           <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+                  [disabled]="readOnlyMode"
                   value="has-else"
                   (change)="toggleElseOnAlternate(path.concat([2]), $any($event.target).value); $any($event.target).value = 'has-else'">
             <option value="has-else">[Else ▼]</option>
@@ -692,6 +716,7 @@
         <!-- Add Else to the Else If -->
         <span *ngIf="!node.alternate.alternate" class="ms-2">
           <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+                  [disabled]="readOnlyMode"
                   value="no-else"
                   (change)="toggleElseOnAlternate(path.concat([2]), $any($event.target).value); $any($event.target).value = 'no-else'">
             <option value="no-else">[+ Add Else ▼]</option>
@@ -706,6 +731,7 @@
       <!-- Simple Else (when alternate is not an If statement) -->
       <span *ngIf="node.alternate && node.alternate.type !== 'If'" class="ms-2">
         <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+                [disabled]="readOnlyMode"
                 value="has-else"
                 (change)="toggleElse(path, $any($event.target).value); $any($event.target).value = 'has-else'">
           <option value="has-else">[Else ▼]</option>
@@ -722,6 +748,7 @@
       <!-- No Else/Else If yet -->
       <span *ngIf="!node.alternate" class="ms-2">
         <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+                [disabled]="readOnlyMode"
                 value="no-else"
                 (change)="toggleElse(path, $any($event.target).value); $any($event.target).value = 'no-else'">
           <option value="no-else">[+ Add Else ▼]</option>
@@ -736,6 +763,7 @@
     <!-- Switch Statement -->
     <span *ngIf="node.type === 'Switch'" class="switch-statement">
       <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
+              [disabled]="readOnlyMode"
               value="switch"
               (change)="changeControlFlowType(path, $any($event.target).value)">
         <option value="switch">[Switch ▼]</option>
@@ -841,14 +869,14 @@
           <span class="brace">{{ '{' }}</span>
           <ng-container *ngTemplateOutlet="inlineNode; context: { node: case.consequent, path: path.concat([i * 2 + 2]) }"></ng-container>
           <span class="brace">{{ '}' }}</span>
-          <button *ngIf="node.cases!.length > 1"
+          <button *ngIf="node.cases!.length > 1 && !readOnlyMode"
                   class="btn btn-sm btn-outline-danger ms-2"
                   (click)="removeSwitchCase(path, i)"
                   title="Remove this case">
             <i class="bi bi-x-circle"></i>
           </button>
         </div>
-        <div class="mb-2">
+        <div class="mb-2" *ngIf="!readOnlyMode">
           <button class="btn btn-sm btn-outline-success"
                   (click)="addSwitchCase(path)"
                   title="Add another case">
@@ -861,13 +889,13 @@
           <span class="brace">{{ '{' }}</span>
           <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.default, path: path.concat([node.cases!.length * 2 + 1]) }"></ng-container>
           <span class="brace">{{ '}' }}</span>
-          <button class="btn btn-sm btn-outline-danger ms-2"
+          <button *ngIf="!readOnlyMode" class="btn btn-sm btn-outline-danger ms-2"
                   (click)="removeSwitchDefault(path)"
                   title="Remove default case">
             <i class="bi bi-x-circle"></i>
           </button>
         </div>
-        <div *ngIf="!node.default" class="mb-2">
+        <div *ngIf="!node.default && !readOnlyMode" class="mb-2">
           <button class="btn btn-sm btn-outline-success"
                   (click)="addSwitchDefault(path)"
                   title="Add default case">
