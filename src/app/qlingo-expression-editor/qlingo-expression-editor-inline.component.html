@@ -267,27 +267,27 @@
               [value]="node.operator"
               (change)="updateOperator(path, $any($event.target).value); $any($event.target).value = node.operator">
         <optgroup label="Arithmetic">
-          <option value="+">+</option>
-          <option value="-">-</option>
-          <option value="*">*</option>
-          <option value="/">/</option>
-          <option value="%">%</option>
-          <option value="^">^</option>
+          <option value="+">+ ▼</option>
+          <option value="-">- ▼</option>
+          <option value="*">* ▼</option>
+          <option value="/">/ ▼</option>
+          <option value="%">% ▼</option>
+          <option value="^">^ ▼</option>
         </optgroup>
         <optgroup label="Comparison">
-          <option value="==">=</option>
-          <option value="!=">!=</option>
-          <option value="<">&lt;</option>
-          <option value=">">&gt;</option>
-          <option value="<=">&lt;=</option>
-          <option value=">=">&gt;=</option>
+          <option value="==">= ▼</option>
+          <option value="!=">!= ▼</option>
+          <option value="<">&lt; ▼</option>
+          <option value=">">&gt; ▼</option>
+          <option value="<=">&lt;= ▼</option>
+          <option value=">=">&gt;= ▼</option>
         </optgroup>
         <optgroup label="Logical">
-          <option value="AND">AND</option>
-          <option value="OR">OR</option>
+          <option value="AND">AND ▼</option>
+          <option value="OR">OR ▼</option>
         </optgroup>
         <optgroup label="String">
-          <option value="&">&amp;</option>
+          <option value="&">&amp; ▼</option>
         </optgroup>
         <optgroup label="Actions">
           <option value="clear">✕ Clear</option>
@@ -306,10 +306,10 @@
       <select class="form-select form-select-sm d-inline-block w-auto me-2 operator-select"
               [value]="node.operator"
               (change)="updateOperator(path, $any($event.target).value); $any($event.target).value = node.operator">
-        <option value="+">+</option>
-        <option value="-">-</option>
-        <option value="!">!</option>
-        <option value="NOT">NOT</option>
+        <option value="+">+ ▼</option>
+        <option value="-">- ▼</option>
+        <option value="!">! ▼</option>
+        <option value="NOT">NOT ▼</option>
         <optgroup label="Actions">
           <option value="clear">✕ Clear</option>
         </optgroup>

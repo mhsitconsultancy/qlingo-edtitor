@@ -127,6 +127,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0;
+    white-space: nowrap;
 
     .binding-prefix, .binding-suffix {
       font-weight: bold;
