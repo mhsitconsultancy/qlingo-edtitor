@@ -499,6 +499,16 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
    */
   changeFunctionOrType(path: number[], optionKey: string): void {
     if (!optionKey) return;
+
+    // If it's the same function, don't do anything
+    const currentNode = this.getNodeAtPath(path);
+    if (currentNode && currentNode.type === 'FunctionCall') {
+      const currentKey = this.getFunctionOptionKey(currentNode.name!);
+      if (currentKey === optionKey) {
+        return;
+      }
+    }
+
     if (optionKey === 'clear') {
       this.clearNode(path);
       return;
@@ -731,5 +741,89 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
       return ']';
     }
     return String.fromCharCode(125); // }
+  }
+
+  /**
+   * Get function display name with parameter count
+   */
+  getFunctionDisplayName(funcName: string): string {
+    const paramCount = this.getFunctionParamCount(funcName);
+    if (paramCount === 0) {
+      return `${funcName}()`;
+    } else if (paramCount === -1) {
+      return `${funcName}(...)`;
+    } else {
+      return `${funcName}(${paramCount})`;
+    }
+  }
+
+  /**
+   * Get parameter count for a function
+   */
+  getFunctionParamCount(funcName: string): number {
+    const funcKey = funcName.toLowerCase();
+    const functions: { [key: string]: number } = {
+      'abs': 1, 'ceil': 1, 'floor': 1, 'round': 2, 'formatnumber': 3, 'rand': 1, 'max': 2, 'min': 2,
+      'ucase': 1, 'lcase': 1, 'tcase': 1, 'length': 1, 'isnullorempty': 1, 'substring': 3,
+      'trim': 1, 'ltrim': 1, 'rtrim': 1, 'find': 3, 'replace': 4, 'findandreplace': 3,
+      'findandreplacechars': 3, 'findbyregexp': 3, 'findandreplacebyregexp': 4,
+      'cleannumber': 1, 'cleanrecipientkey': 2, 'secureid': 0, 'hextounicode': 1, 'htmlencode': 1,
+      'getday': 1, 'getmonth': 1, 'getyear': 1, 'getdayofweek': 1, 'gethour': 1, 'getminute': 1,
+      'getsecond': 1, 'age': 1, 'now': 0, 'formatdate': 2,
+      'asboolean': 1, 'asdate': 1, 'asnumber': 1, 'asstring': 1, 'asjsonarray': -1,
+      'xmpbarcode': 3, 'isnull': 1, 'isempty': 1
+    };
+    return functions[funcKey] || 1;
+  }
+
+  /**
+   * Get parameter name for a function parameter
+   */
+  getParameterName(funcName: string, paramIndex: number): string {
+    const paramNames: { [key: string]: string[] } = {
+      'Round': ['number', 'decimals'],
+      'FormatNumber': ['number', 'format', 'useComma'],
+      'SubString': ['string', 'start', 'length'],
+      'Find': ['string', 'search', 'start'],
+      'Replace': ['string', 'newStr', 'start', 'count'],
+      'FindAndReplace': ['string', 'find', 'replace'],
+      'FindAndReplaceChars': ['string', 'chars', 'replace'],
+      'FindByRegExp': ['string', 'pattern', 'firstOnly'],
+      'FindAndReplaceByRegExp': ['string', 'pattern', 'replace', 'firstOnly'],
+      'CleanRecipientKey': ['string', 'replaceWith'],
+      'FormatDate': ['date', 'format'],
+      'Max': ['value1', 'value2'],
+      'Min': ['value1', 'value2'],
+      'XMPBarcode': ['type', 'data', 'options']
+    };
+
+    if (paramNames[funcName] && paramIndex < paramNames[funcName].length) {
+      return paramNames[funcName][paramIndex];
+    }
+    return `param${paramIndex + 1}`;
+  }
+
+  /**
+   * Get placeholder text for empty slot based on context
+   * If this is a function parameter, return the parameter name
+   * Otherwise return generic "Add Expression"
+   */
+  getEmptySlotPlaceholder(path: number[]): string {
+    if (path.length === 0) {
+      return 'Add Expression';
+    }
+
+    // Get parent path and node
+    const parentPath = path.slice(0, -1);
+    const paramIndex = path[path.length - 1];
+    const parentNode = this.getNodeAtPath(parentPath);
+
+    // If parent is a FunctionCall, return the parameter name
+    if (parentNode && parentNode.type === 'FunctionCall' && parentNode.name) {
+      const paramName = this.getParameterName(parentNode.name, paramIndex);
+      return paramName;
+    }
+
+    return 'Add Expression';
   }
 }

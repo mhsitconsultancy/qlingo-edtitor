@@ -68,7 +68,7 @@
     <span *ngIf="node.type === 'Empty'" class="empty-slot">
       <select class="form-select form-select-sm d-inline-block w-auto"
               (change)="replaceNode(path, $any($event.target).value); $any($event.target).value = ''">
-        <option value="">[ Add Expression ▼ ]</option>
+        <option value="">[ {{ getEmptySlotPlaceholder(path) }} ▼ ]</option>
         <optgroup label="Literals">
           <option value="literal-string">String</option>
           <option value="literal-number">Number</option>
@@ -444,7 +444,7 @@
       <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
               [value]="getFunctionOptionKey(node.name)"
               (change)="changeFunctionOrType(path, $any($event.target).value)">
-        <option [value]="getFunctionOptionKey(node.name)">[{{ node.name }} ▼]</option>
+        <option [value]="getFunctionOptionKey(node.name)">[{{ getFunctionDisplayName(node.name) }} ▼]</option>
         <optgroup label="Change to Function - Numeric">
           <option value="func-abs">[Abs ▼]</option>
           <option value="func-ceil">[Ceil ▼]</option>
