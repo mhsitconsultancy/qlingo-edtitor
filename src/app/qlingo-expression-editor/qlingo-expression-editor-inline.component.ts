@@ -148,6 +148,22 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
       if (index === 0) node.condition = newNode;
       else if (index === 1) node.consequent = newNode;
       else node.alternate = newNode;
+    } else if (node.type === 'Switch') {
+      if (index === 0) {
+        node.discriminant = newNode;
+      } else {
+        const caseCount = node.cases!.length;
+        if (index <= caseCount * 2) {
+          const caseIndex = Math.floor((index - 1) / 2);
+          if ((index - 1) % 2 === 0) {
+            node.cases![caseIndex].test = newNode;
+          } else {
+            node.cases![caseIndex].consequent = newNode;
+          }
+        } else {
+          node.default = newNode;
+        }
+      }
     }
   }
 
@@ -386,6 +402,12 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
   changeLiteralOrType(path: number[], optionKey: string): void {
     if (!optionKey) return;
 
+    // Handle clear action
+    if (optionKey === 'clear') {
+      this.clearNode(path);
+      return;
+    }
+
     // If it's a literal type change (literal-string, literal-number, etc.)
     if (optionKey.startsWith('literal-')) {
       const dataType = optionKey.replace('literal-', '');
@@ -401,6 +423,10 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
    */
   changeVariableOrType(path: number[], optionKey: string): void {
     if (!optionKey || optionKey === 'variable') return;
+    if (optionKey === 'clear') {
+      this.clearNode(path);
+      return;
+    }
     this.replaceNode(path, optionKey);
   }
 
@@ -409,6 +435,10 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
    */
   changeFunctionOrType(path: number[], optionKey: string): void {
     if (!optionKey) return;
+    if (optionKey === 'clear') {
+      this.clearNode(path);
+      return;
+    }
     this.replaceNode(path, optionKey);
   }
 
@@ -417,6 +447,10 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
    */
   changeControlFlowType(path: number[], optionKey: string): void {
     if (!optionKey) return;
+    if (optionKey === 'clear') {
+      this.clearNode(path);
+      return;
+    }
     this.replaceNode(path, optionKey);
   }
 
@@ -546,5 +580,22 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
       'IsEmpty': 'func-isempty'
     };
     return funcMap[funcName] || 'func-' + funcName.toLowerCase();
+  }
+
+  /**
+   * Clear/delete a node by replacing it with an Empty node
+   */
+  clearNode(path: number[]): void {
+    const emptyNode: ExpressionNode = { type: 'Empty', nodeType: 'primary' };
+
+    // Special case: if clearing root, just replace it
+    if (path.length === 0) {
+      this.rootNode = emptyNode;
+      this.updateGeneratedExpression();
+      return;
+    }
+
+    // Otherwise, replace the node at the path
+    this.updateNodeAtPath(path, emptyNode);
   }
 }

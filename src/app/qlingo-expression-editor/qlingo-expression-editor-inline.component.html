@@ -116,11 +116,11 @@
       </select>
     </span>
 
-    <!-- Literal - Type dropdown + Input field -->
+    <!-- Literal - Type dropdown + Input field + Delete button -->
     <span *ngIf="node.type === 'Literal'" class="literal-value">
       <select class="form-select form-select-sm d-inline-block w-auto keyword-dropdown"
               [value]="'literal-' + node.dataType"
-              (change)="changeLiteralOrType(path, $any($event.target).value)">
+              (change)="changeLiteralOrType(path, $any($event.target).value); $any($event.target).value = 'literal-' + node.dataType">
         <optgroup label="Literal Type">
           <option value="literal-string">[String ▼]</option>
           <option value="literal-number">[Number ▼]</option>
@@ -167,6 +167,9 @@
           <option value="op-or">OR</option>
           <option value="op-not">NOT</option>
         </optgroup>
+        <optgroup label="Actions">
+          <option value="clear">✕ Clear</option>
+        </optgroup>
       </select>
       <input *ngIf="node.dataType === 'string'"
              type="text"
@@ -188,6 +191,11 @@
         <option [value]="true">TRUE</option>
         <option [value]="false">FALSE</option>
       </select>
+      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
+              (click)="clearNode(path)"
+              title="Clear this expression">
+        <i class="bi bi-x-circle"></i>
+      </button>
     </span>
 
     <!-- Variable - Dropdown or input -->
@@ -240,6 +248,9 @@
           <option value="op-or">OR</option>
           <option value="op-not">NOT</option>
         </optgroup>
+        <optgroup label="Actions">
+          <option value="clear">✕ Clear</option>
+        </optgroup>
       </select>
       <span class="binding-prefix">|->[</span>
       <select *ngIf="availableVariables.length > 0"
@@ -256,6 +267,11 @@
              (input)="updateVariable(path, $any($event.target).value)"
              placeholder="VariableName">
       <span class="binding-suffix">]</span>
+      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
+              (click)="clearNode(path)"
+              title="Clear this expression">
+        <i class="bi bi-x-circle"></i>
+      </button>
     </span>
 
     <!-- Binary Operator -->
@@ -345,6 +361,9 @@
           <option value="if">If/Then/Else</option>
           <option value="switch">Switch/Case</option>
         </optgroup>
+        <optgroup label="Actions">
+          <option value="clear">✕ Clear</option>
+        </optgroup>
       </select>
       <span class="paren">(</span>
       <span *ngFor="let arg of node.args; let i = index; let isLast = last">
@@ -352,6 +371,11 @@
         <span *ngIf="!isLast" class="comma">, </span>
       </span>
       <span class="paren">)</span>
+      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
+              (click)="clearNode(path)"
+              title="Clear this expression">
+        <i class="bi bi-x-circle"></i>
+      </button>
     </span>
 
     <!-- If Statement -->
@@ -378,7 +402,15 @@
           <option value="func-length">Length()</option>
           <option value="func-trim">Trim()</option>
         </optgroup>
+        <optgroup label="Actions">
+          <option value="clear">✕ Clear</option>
+        </optgroup>
       </select>
+      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
+              (click)="clearNode(path)"
+              title="Clear this expression">
+        <i class="bi bi-x-circle"></i>
+      </button>
       <span class="paren">(</span>
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.condition, path: path.concat([0]) }"></ng-container>
       <span class="paren">)</span>
@@ -491,7 +523,15 @@
           <option value="func-length">Length()</option>
           <option value="func-trim">Trim()</option>
         </optgroup>
+        <optgroup label="Actions">
+          <option value="clear">✕ Clear</option>
+        </optgroup>
       </select>
+      <button *ngIf="path.length > 0" class="btn btn-sm btn-outline-danger ms-1 delete-btn"
+              (click)="clearNode(path)"
+              title="Clear this expression">
+        <i class="bi bi-x-circle"></i>
+      </button>
       <span class="paren">(</span>
       <ng-container *ngTemplateOutlet="inlineNode; context: { node: node.discriminant, path: path.concat([0]) }"></ng-container>
       <span class="paren">)</span>
