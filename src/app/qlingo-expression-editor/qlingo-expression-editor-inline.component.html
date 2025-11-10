@@ -446,10 +446,12 @@
               (change)="changeFunctionOrType(path, $any($event.target).value)">
         <option [value]="getFunctionOptionKey(node.name)">[{{ getFunctionDisplayName(node.name) }} ▼]</option>
         <optgroup label="Change to Function - Numeric">
-          <option value="func-abs">[Abs ▼]</option>
+          <option value="func-abs">[ABS ▼]</option>
           <option value="func-ceil">[Ceil ▼]</option>
           <option value="func-floor">[Floor ▼]</option>
           <option value="func-round">[Round ▼]</option>
+          <option value="func-formatnumber">[FormatNumber ▼]</option>
+          <option value="func-rand">[Rand ▼]</option>
           <option value="func-max">[Max ▼]</option>
           <option value="func-min">[Min ▼]</option>
         </optgroup>
@@ -458,11 +460,46 @@
           <option value="func-lcase">[LCase ▼]</option>
           <option value="func-tcase">[TCase ▼]</option>
           <option value="func-length">[Length ▼]</option>
-          <option value="func-trim">[Trim ▼]</option>
+          <option value="func-isnullorempty">[IsNullOrEmpty ▼]</option>
           <option value="func-substring">[SubString ▼]</option>
+          <option value="func-trim">[Trim ▼]</option>
+          <option value="func-ltrim">[LTrim ▼]</option>
+          <option value="func-rtrim">[RTrim ▼]</option>
+          <option value="func-find">[Find ▼]</option>
+          <option value="func-replace">[Replace ▼]</option>
+          <option value="func-findandreplace">[FindAndReplace ▼]</option>
+          <option value="func-findandreplacechars">[FindAndReplaceChars ▼]</option>
+          <option value="func-findbyregexp">[FindByRegExp ▼]</option>
+          <option value="func-findandreplacebyregexp">[FindAndReplaceByRegExp ▼]</option>
+          <option value="func-cleannumber">[CleanNumber ▼]</option>
+          <option value="func-cleanrecipientkey">[CleanRecipientKey ▼]</option>
+          <option value="func-secureid">[SecureID ▼]</option>
+          <option value="func-hextounicode">[HexToUnicode ▼]</option>
+          <option value="func-htmlencode">[HtmlEncode ▼]</option>
+        </optgroup>
+        <optgroup label="Change to Function - Date">
+          <option value="func-getday">[GetDay ▼]</option>
+          <option value="func-getmonth">[GetMonth ▼]</option>
+          <option value="func-getyear">[GetYear ▼]</option>
+          <option value="func-getdayofweek">[GetDayOfWeek ▼]</option>
+          <option value="func-gethour">[GetHour ▼]</option>
+          <option value="func-getminute">[GetMinute ▼]</option>
+          <option value="func-getsecond">[GetSecond ▼]</option>
+          <option value="func-age">[Age ▼]</option>
+          <option value="func-now">[Now ▼]</option>
+          <option value="func-formatdate">[FormatDate ▼]</option>
+        </optgroup>
+        <optgroup label="Change to Function - Conversion">
+          <option value="func-asboolean">[AsBoolean ▼]</option>
+          <option value="func-asdate">[AsDate ▼]</option>
+          <option value="func-asnumber">[AsNumber ▼]</option>
+          <option value="func-asstring">[AsString ▼]</option>
+          <option value="func-asjsonarray">[AsJsonArray ▼]</option>
+        </optgroup>
+        <optgroup label="Change to Function - Barcode">
+          <option value="func-xmpbarcode">[XMPBarcode ▼]</option>
         </optgroup>
         <optgroup label="Change to Function - Utility">
-          <option value="func-isnullorempty">[IsNullOrEmpty ▼]</option>
           <option value="func-isnull">[IsNull ▼]</option>
           <option value="func-isempty">[IsEmpty ▼]</option>
         </optgroup>
@@ -475,6 +512,7 @@
         </optgroup>
         <optgroup label="Change to Variable">
           <option value="variable">Variable</option>
+          <option value="datafield">Data Field</option>
         </optgroup>
         <optgroup label="Change to Control Flow">
           <option value="if">If/Then/Else</option>
