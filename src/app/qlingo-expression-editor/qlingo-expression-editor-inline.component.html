@@ -253,6 +253,7 @@
               [value]="node.name"
               (change)="updateVariable(path, $any($event.target).value)">
         <option value="">Select Variable ▼</option>
+        <option *ngIf="node.name && !availableVariables.includes(node.name)" [value]="node.name">{{ node.name }}</option>
         <option *ngFor="let varName of availableVariables" [value]="varName">{{ varName }}</option>
       </select>
       <input *ngIf="availableVariables.length === 0"
