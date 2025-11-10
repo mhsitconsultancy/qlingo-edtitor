@@ -255,6 +255,12 @@
                (input)="updateVariable(path, $any($event.target).value)"
                [attr.list]="availableVariables.length > 0 ? 'variables-' + getPathId(path) : null"
                placeholder="Variable ▼">
+        <button *ngIf="node.name"
+                class="variable-clear-btn"
+                (click)="updateVariable(path, '')"
+                title="Clear variable">
+          <i class="bi bi-x"></i>
+        </button>
         <datalist *ngIf="availableVariables.length > 0" [id]="'variables-' + getPathId(path)">
           <option *ngFor="let varName of availableVariables" [value]="varName">{{ varName }}</option>
         </datalist>
