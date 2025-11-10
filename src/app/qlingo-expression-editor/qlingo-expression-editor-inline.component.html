@@ -248,20 +248,15 @@
         </optgroup>
       </select>
       <span class="binding-prefix">|->[</span>
-      <select *ngIf="availableVariables.length > 0"
-              class="form-select form-select-sm d-inline-block w-auto variable-select"
-              [value]="node.name"
-              (change)="updateVariable(path, $any($event.target).value)">
-        <option value="">Select Variable ▼</option>
-        <option *ngIf="node.name && !availableVariables.includes(node.name)" [value]="node.name">{{ node.name }}</option>
-        <option *ngFor="let varName of availableVariables" [value]="varName">{{ varName }}</option>
-      </select>
-      <input *ngIf="availableVariables.length === 0"
-             type="text"
+      <input type="text"
              class="form-control form-control-sm d-inline-block variable-input"
-             [value]="node.name"
+             [value]="node.name || ''"
              (input)="updateVariable(path, $any($event.target).value)"
-             placeholder="VariableName">
+             [attr.list]="availableVariables.length > 0 ? 'variables-' + getPathId(path) : null"
+             placeholder="Variable name">
+      <datalist *ngIf="availableVariables.length > 0" [id]="'variables-' + getPathId(path)">
+        <option *ngFor="let varName of availableVariables" [value]="varName">{{ varName }}</option>
+      </datalist>
       <span class="binding-suffix">]</span>
     </span>
 

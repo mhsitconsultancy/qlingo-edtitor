@@ -606,4 +606,11 @@ export class QlingoExpressionEditorInlineComponent implements OnInit {
     // Otherwise, replace the node at the path
     this.updateNodeAtPath(path, emptyNode);
   }
+
+  /**
+   * Generate a unique ID for a path (for datalist references)
+   */
+  getPathId(path: number[]): string {
+    return path.length === 0 ? 'root' : path.join('-');
+  }
 }
