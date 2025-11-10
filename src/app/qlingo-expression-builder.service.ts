@@ -41,10 +41,26 @@ export class QLingoExpressionBuilderService {
         };
 
       case 'Variable':
+        // Detect varType based on AST properties or syntax
+        // The QLingo interpreter may provide a 'syntax' or 'binding' property
+        let varType: string = 'datafield'; // Default to datafield
+
+        // Check if AST has syntax indicator
+        if (ast.syntax === 'variable' || ast.binding === '@') {
+          varType = 'variable';
+        } else if (ast.syntax === 'datafield' || ast.binding === '|->') {
+          varType = 'datafield';
+        }
+        // If no indicator, check the original name format if available
+        else if (ast.originalSyntax) {
+          varType = ast.originalSyntax.startsWith('@{') ? 'variable' : 'datafield';
+        }
+
         return {
           type: 'Variable',
           nodeType: 'primary',
-          name: ast.name
+          name: ast.name,
+          varType: varType
         };
 
       case 'Identifier':
@@ -136,7 +152,13 @@ export class QLingoExpressionBuilderService {
         }
 
       case 'Variable':
-        return `|->[${node.name}]`;
+        // Check varType to determine the syntax
+        if (node.varType === 'variable') {
+          return `@{${node.name}}`;
+        } else {
+          // Default to datafield format (|->[FieldName])
+          return `|->[${node.name}]`;
+        }
 
       case 'Identifier':
         return node.name!;
